@@ -6373,7 +6373,7 @@ $("bailleurDoImportBtn").addEventListener("click", () => {
   toast("✅ Configuration importée : " + (cfg.ribs ? cfg.ribs.length : 0) + " RIB" + ((cfg.ribs && cfg.ribs.length > 1) ? "s" : "") + " disponibles.", "ok");
 });
 
-applyBailleurToUI();
+try { applyBailleurToUI(); } catch(_){}
 
 /* ============================================================
    CALENDRIER & RÉSERVATIONS
