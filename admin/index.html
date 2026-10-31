@@ -11785,6 +11785,7 @@ function genUserId(){ return "u_" + Date.now().toString(36) + Math.random().toSt
 
 // === UI Auth modal ===
 function showAuthOverlay(mode){
+  if(document.body.classList.contains("sign-mode")) return;
   $("authOverlay").style.display = "flex";
   $("authSetup").style.display = mode === "setup" ? "block" : "none";
   $("authLogin").style.display = mode === "login" ? "block" : "none";
