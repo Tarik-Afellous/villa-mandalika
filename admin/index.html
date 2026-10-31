@@ -5975,6 +5975,14 @@ const DEFAULT_RIB = {
   iban: "FR76 1695 8000 0162 3749 9548 960",
   bic: "QNTOFRP1XXX"
 };
+const DEFAULT_RIB_REVOLUT = {
+  id: "revolut-default",
+  nom: "REVOLUT — Compte secondaire",
+  banque: "REVOLUT",
+  titulaire: "ST EVENTS",
+  iban: "",
+  bic: "REVOGB21"
+};
 function loadBailleurConfig(){
   try{
     const raw = localStorage.getItem(BAILLEUR_KEY);
@@ -6326,15 +6334,17 @@ function switchTab(tabId){
     }, 900);
   });
 })();
-document.querySelectorAll(".tab").forEach(t => {
+document.querySelectorAll("#tabsBar .tab").forEach(t => {
   t.addEventListener("click", () => switchTab(t.dataset.tab));
+});
+// Sous-onglets Réservation
+document.querySelectorAll("#subTabsBar .sub-tab").forEach(s => {
+  s.addEventListener("click", () => switchTab(s.dataset.subtab));
 });
 // Restaurer l'onglet actif au chargement
 try {
   const last = localStorage.getItem("stevents_active_tab");
-  if(last && document.querySelector('.tab[data-tab="' + last + '"]')){
-    switchTab(last);
-  }
+  if(last){ switchTab(last); }
 } catch {}
 
 // Zoom au survol des aperçus d'images / PDF
