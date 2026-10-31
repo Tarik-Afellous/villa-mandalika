@@ -6226,17 +6226,56 @@ async function wipWrap(label, fn){
 }
 
 function switchTab(tabId){
+  // Mapping des anciens onglets vers les nouveaux groupes
+  const SUBTAB_IDS = ["t-quote","t-identity","t-address","t-infos","t-services","t-payments","t-contract"];
+  const DOC_IDS = ["t-prefill","t-history"];
   if(tabId === "t-address") tabId = "t-identity";
   if(tabId === "t-services") tabId = "t-infos";
+
+  // Déterminer quel onglet principal et quel sous-onglet
+  let mainTab = tabId;
+  let subTab = null;
+  if(SUBTAB_IDS.includes(tabId)){ mainTab = "t-reservation"; subTab = tabId; }
+  else if(DOC_IDS.includes(tabId)){ mainTab = "t-documents"; }
+  else if(tabId === "t-accounting"){ mainTab = "t-finances"; }
+
+  // Sous-onglets associés
   const groups = { "t-identity": ["t-identity","t-address"], "t-infos": ["t-infos","t-services"] };
-  const activeSet = new Set(groups[tabId] || [tabId]);
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tabId));
+
+  // Déterminer quels tab-content afficher
+  let activeSet;
+  if(mainTab === "t-reservation"){
+    const st = subTab || window.__lastSubTab || "t-quote";
+    window.__lastSubTab = st;
+    activeSet = new Set(groups[st] || [st]);
+  } else if(mainTab === "t-documents"){
+    activeSet = new Set(DOC_IDS);
+  } else if(mainTab === "t-finances"){
+    activeSet = new Set(["t-accounting"]);
+  } else {
+    activeSet = new Set([mainTab]);
+  }
+
+  // Mettre à jour les onglets principaux
+  document.querySelectorAll("#tabsBar .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === mainTab));
   document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", activeSet.has(c.dataset.tab)));
+
+  // Afficher/masquer la barre de sous-onglets
+  const subBar = document.getElementById("subTabsBar");
+  if(subBar){
+    subBar.hidden = (mainTab !== "t-reservation");
+    if(mainTab === "t-reservation"){
+      const st = subTab || window.__lastSubTab || "t-quote";
+      subBar.querySelectorAll(".sub-tab").forEach(s => s.classList.toggle("active", s.dataset.subtab === st));
+    }
+  }
+
   window.scrollTo({ top: 0, behavior: "smooth" });
   try { localStorage.setItem("stevents_active_tab", tabId); } catch {}
-  // Sur l'onglet Contrat : génère automatiquement le PDF en mode "silent"
-  // (pas de confirmations, champs vides acceptés, pas de blocage sur acomptes/event incomplets).
-  if(tabId === "t-contract" && !window.__autoGenDoneForCurrentEdit){
+
+  // Sur l'onglet Contrat : génère automatiquement le PDF
+  const effectiveTab = mainTab === "t-reservation" ? (subTab || window.__lastSubTab) : mainTab;
+  if(effectiveTab === "t-contract" && !window.__autoGenDoneForCurrentEdit){
     setTimeout(() => {
       const btn = document.getElementById("genBtn");
       if(btn){
