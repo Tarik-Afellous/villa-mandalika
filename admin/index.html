@@ -479,7 +479,8 @@
   /* Mode VIEWER (femme de ménage + chef sécurité) : ne voit QUE l'onglet Calendrier,
      peut ouvrir la fiche client mais en LECTURE SEULE (pas d'édition, pas de paiements,
      pas de suppression). Masque tous les autres onglets + boutons d'admin du calendrier. */
-  body.user-viewer .tab:not([data-tab="t-calendar"]){display:none !important}
+  body.user-viewer #tabsBar .tab:not([data-tab="t-calendar"]){display:none !important}
+  body.user-viewer .sub-tabs-bar{display:none !important}
   body.user-viewer .tab-content:not([data-tab="t-calendar"]){display:none !important}
   body.user-viewer .calendar-actions,
   body.user-viewer #airbnbSyncSection,
@@ -1724,7 +1725,7 @@
       </div>
     </div>
 
-    <p class="hint" style="margin-top:18px;padding:10px;background:#0f172a;border-left:3px solid var(--accent2);border-radius:4px">💳 <strong>Paiements (acomptes, solde, RIB, caution Stripe / Swikly)</strong> sont dans l'onglet <em>3. Paiements</em>.</p>
+    <p class="hint" style="margin-top:18px;padding:10px;background:#0f172a;border-left:3px solid var(--accent2);border-radius:4px">💳 <strong>Paiements (acomptes, solde, RIB, caution Stripe / Swikly)</strong> sont dans le sous-onglet <em>Paiements</em>.</p>
 
     <div class="heading-1">Date de signature</div>
     <div>
