@@ -5719,12 +5719,21 @@ function buildContratPdfDef(d){
           { text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 70, 0, 0] }
         ], width: '*', alignment: 'center'
       },
-      { stack: [
-          { text: 'POUR LE PRENEUR', color: GOLD, fontSize: 8, bold: true, characterSpacing: 2, alignment: 'center' },
-          { text: d.nom, color: SOFT, fontSize: 9, italics: true, alignment: 'center', margin: [0, 2, 0, 0] },
-          { canvas: [ { type:'rect', x:0, y:60, w:200, h:0.5, color: NAVY } ], margin: [0, 6, 0, 0], alignment: 'center' },
-          { text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 70, 0, 0] }
-        ], width: '*', alignment: 'center'
+      { stack: (function(){
+          const s = [
+            { text: 'POUR LE PRENEUR', color: GOLD, fontSize: 8, bold: true, characterSpacing: 2, alignment: 'center' },
+            { text: d.nom, color: SOFT, fontSize: 9, italics: true, alignment: 'center', margin: [0, 2, 0, 0] }
+          ];
+          if(window.__clientSignatureData){
+            s.push({ text: 'Lu et approuvé', color: NAVY, fontSize: 9, italics: true, alignment: 'center', margin: [0, 8, 0, 4] });
+            s.push({ image: window.__clientSignatureData, width: 180, alignment: 'center', margin: [0, 0, 0, 4] });
+            s.push({ text: 'Signé électroniquement le ' + (window.__clientSignatureDate ? new Date(window.__clientSignatureDate).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'), color: SOFT, fontSize: 7, alignment: 'center', italics: true });
+          } else {
+            s.push({ canvas: [ { type:'rect', x:0, y:60, w:200, h:0.5, color: NAVY } ], margin: [0, 6, 0, 0], alignment: 'center' });
+            s.push({ text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 70, 0, 0] });
+          }
+          return s;
+        })(), width: '*', alignment: 'center'
       }
     ]
   });
