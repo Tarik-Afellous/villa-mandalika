@@ -6197,11 +6197,13 @@ async function wipWrap(label, fn){
 }
 
 function switchTab(tabId){
+  if(tabId === "t-address") tabId = "t-identity";
+  if(tabId === "t-services") tabId = "t-infos";
+  const groups = { "t-identity": ["t-identity","t-address"], "t-infos": ["t-infos","t-services"] };
+  const activeSet = new Set(groups[tabId] || [tabId]);
   document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tabId));
-  document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", c.dataset.tab === tabId));
-  // Scroll en haut de page sur changement
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", activeSet.has(c.dataset.tab)));
   window.scrollTo({ top: 0, behavior: "smooth" });
-  // Mémoriser le dernier onglet ouvert
   try { localStorage.setItem("stevents_active_tab", tabId); } catch {}
   // Sur l'onglet Contrat : génère automatiquement le PDF en mode "silent"
   // (pas de confirmations, champs vides acceptés, pas de blocage sur acomptes/event incomplets).
