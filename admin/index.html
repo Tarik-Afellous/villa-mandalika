@@ -11166,6 +11166,8 @@ function exitClientMode(){
       + '<button onclick="startSettingsMigration()" style="background:#d5ae4e;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">📥 Importer les réglages</button>'
       + '<button onclick="this.parentElement.remove()" style="background:transparent;color:#94a3b8;border:1px solid #475569;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">Ignorer</button>';
     document.body.appendChild(banner);
+    var hint = document.getElementById("setupMigrateHint");
+    if(hint) hint.style.display = "block";
   }, 2500);
 })();
 
