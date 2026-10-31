@@ -15013,7 +15013,7 @@ function checkSettingsStatus(){
 
 function showSettingsAlertBanner(issues){
   if(!issues || !issues.length) return;
-  // Ne pas re-afficher si l'utilisateur a déjà fermé le bandeau cette session
+  if(document.body.classList.contains("sign-mode")) return;
   if(sessionStorage.getItem("stevents_settings_alert_dismissed") === "1") return;
   let banner = document.getElementById("settingsAlertBanner");
   if(banner) banner.remove();
