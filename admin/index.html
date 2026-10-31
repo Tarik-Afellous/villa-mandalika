@@ -9562,7 +9562,7 @@ async function importStevFromFile(file, statusEl){
     await applyClientData(data);
     const nomGuess = ((data.nom||"") + " " + (data.prenom||"")).trim();
     const pieces = ["cniRecto","cniVerso","dom"].filter(k => data[k] && data[k].dataURL).length;
-    if(statusEl) statusEl.innerHTML = "✅ Dossier importé : <strong>" + (nomGuess || "(sans nom)") + "</strong>" + (pieces ? " · " + pieces + " pièce(s)" : "") + ". Vérifie les onglets Identité / Adresse / Paiements.";
+    if(statusEl) statusEl.innerHTML = "✅ Dossier importé : <strong>" + (nomGuess || "(sans nom)") + "</strong>" + (pieces ? " · " + pieces + " pièce(s)" : "") + ". Vérifie les onglets Client / Séjour / Paiements.";
     toast("✅ Dossier client importé : " + (nomGuess || "(sans nom)"), "ok");
     return true;
   } catch(err){
