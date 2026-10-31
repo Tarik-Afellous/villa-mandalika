@@ -741,6 +741,10 @@
       <input type="color" id="setupColor" value="#fbbf24" style="height:38px;padding:2px">
     </div>
     <button type="button" class="primary" id="setupSubmit">Créer mon compte admin</button>
+    <div id="setupMigrateHint" style="margin-top:16px;padding:12px;background:rgba(213,174,78,0.1);border:1px solid #d5ae4e;border-radius:8px;text-align:center;display:none">
+      <p style="margin:0 0 8px;font-size:12px;color:#e2e8f0">Vous utilisiez déjà l'app sur un autre domaine ?</p>
+      <button type="button" onclick="startSettingsMigration()" style="background:#d5ae4e;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">📥 Importer depuis l'ancien domaine</button>
+    </div>
   </div>
   <!-- Mode "login" : connexion -->
   <div id="authLogin" class="auth-card" style="display:none">
@@ -11154,7 +11158,6 @@ function exitClientMode(){
     var hasVision = !!localStorage.getItem("stevents_vision_apikey");
     var hasBackend = !!localStorage.getItem("stevents_gmail_backend_url");
     if(hasPat || hasVision || hasBackend) return;
-    if(!localStorage.getItem("stevents_current_user")) return;
     var other = location.hostname === "villa-mandalika.com" ? "stevents-app.pages.dev" : "villa-mandalika.com";
     var banner = document.createElement("div");
     banner.id = "migrateBanner";
