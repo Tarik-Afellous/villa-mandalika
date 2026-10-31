@@ -782,18 +782,21 @@
 </div>
 <main>
 
-  <!-- BARRE D'ONGLETS -->
+  <!-- BARRE D'ONGLETS PRINCIPALE (5 onglets) -->
   <nav class="tabs-bar" id="tabsBar">
     <button type="button" class="tab active" data-tab="t-calendar">📅 Calendrier</button>
-    <button type="button" class="tab" data-tab="t-quote">📋 Devis</button>
-    <button type="button" class="tab" data-tab="t-prefill">📥 Documents</button>
-    <button type="button" class="tab" data-tab="t-identity">👤 1. Client</button>
-    <button type="button" class="tab" data-tab="t-infos">📋 2. Séjour</button>
-    <button type="button" class="tab" data-tab="t-payments">💳 3. Paiements</button>
-    <button type="button" class="tab" data-tab="t-contract">📄 4. Contrat</button>
-    <button type="button" class="tab" data-tab="t-history">📚 Historique</button>
-    <button type="button" class="tab" data-tab="t-accounting">💰 Comptabilité</button>
+    <button type="button" class="tab" data-tab="t-reservation">📝 Réservation</button>
+    <button type="button" class="tab" data-tab="t-documents">📥 Documents</button>
+    <button type="button" class="tab" data-tab="t-finances">💰 Finances</button>
     <button type="button" class="tab" data-tab="t-settings">⚙️ Réglages</button>
+  </nav>
+  <!-- SOUS-ONGLETS RÉSERVATION (visibles uniquement quand Réservation est actif) -->
+  <nav class="sub-tabs-bar" id="subTabsBar" hidden>
+    <button type="button" class="sub-tab active" data-subtab="t-quote">📋 Devis</button>
+    <button type="button" class="sub-tab" data-subtab="t-identity">👤 Client</button>
+    <button type="button" class="sub-tab" data-subtab="t-infos">📋 Séjour</button>
+    <button type="button" class="sub-tab" data-subtab="t-payments">💳 Paiements</button>
+    <button type="button" class="sub-tab" data-subtab="t-contract">📄 Contrat</button>
   </nav>
 
   <!-- ============= ONGLET CALENDRIER ============= -->
