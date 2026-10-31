@@ -11379,6 +11379,10 @@ function exitClientMode(){
     document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
     const signTab = document.querySelector('.tab-content[data-tab="t-sign"]');
     if(signTab) signTab.classList.add("active");
+    // Masquer bannières et popups parasites en mode signature
+    document.querySelectorAll('[style*="background:#b8924c"], [style*="background:var(--accent2)"], .toast-container, [id*="Banner"], [id*="banner"]').forEach(el => el.style.display = "none");
+    const userBarEl = document.querySelector('[style*="Test"][style*="ADMIN"]');
+    if(userBarEl && userBarEl.parentElement) userBarEl.parentElement.style.display = "none";
 
     const ds = signData;
     const el = id => document.getElementById(id);
