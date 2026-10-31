@@ -11356,20 +11356,294 @@ function exitClientMode(){
   });
 })();
 
+/* ============================================================
+   SIGNATURE À DISTANCE — page client dédiée
+   Le client reçoit un lien #sign=BASE64 contenant les données
+   essentielles du contrat. Il voit le résumé, signe, et
+   télécharge le PDF signé.
+   ============================================================ */
+(function initRemoteSignMode(){
+  let signData = null;
+  let signHasStrokes = false;
+  let signDrawing = false;
+
+  function enterSignMode(b64){
+    const txt = b64decodeUtf8(b64);
+    if(!txt){ alert("Lien de signature invalide."); return; }
+    try { signData = JSON.parse(txt); } catch(_){ alert("Lien de signature invalide."); return; }
+    document.body.classList.add("sign-mode");
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    const signTab = document.querySelector('.tab-content[data-tab="t-sign"]');
+    if(signTab) signTab.classList.add("active");
+
+    const ds = signData;
+    const el = id => document.getElementById(id);
+    if(el("signNom")) el("signNom").textContent = ds.nom || "—";
+    if(el("signDates")) el("signDates").textContent = (ds.dateDebut || "—") + " → " + (ds.dateFin || "—");
+    if(el("signPers")) el("signPers").textContent = (ds.personnesJour || "—") + " personnes";
+    if(el("signTotal")) el("signTotal").textContent = (ds.total || "—") + " €";
+    if(el("signDateSig")) el("signDateSig").textContent = ds.dateSignature || "—";
+
+    initSignPad();
+    generateSignPreview(ds);
+  }
+
+  function generateSignPreview(ds){
+    if(typeof buildContratPdfDef !== "function" || typeof pdfMake === "undefined") return;
+    const bailleur = ds.bailleur || { forme:"SASU", siret:"", adresse:"60 rue de Bellechasse, 75007 Paris" };
+    const data = {
+      nom: ds.nom || "", adresse: ds.adresse || "", cni: ds.cni || "",
+      telephone: ds.telephone || "", email: ds.email || "",
+      date_debut: ds.dateDebut || "", heure_debut: ds.heureDebut || "",
+      date_fin: ds.dateFin || "", heure_fin: ds.heureFin || "",
+      personnes_jour: ds.personnesJour || "", personnes_nuit: ds.personnesNuit || "0",
+      total: ds.total || "", acomptes: ds.acomptes || [], solde: ds.solde || "",
+      date_signature: ds.dateSignature || "",
+      has_event: ds.hasEvent || false,
+      date_evenement: ds.dateEvenement || "", personnes_evenement: ds.personnesEvenement || "",
+      heure_evenement_debut: ds.heureEvenementDebut || "", heure_evenement_fin: ds.heureEvenementFin || "",
+      has_extras: (ds.extras || []).length > 0, extras: ds.extras || [], total_extras: ds.totalExtras || "0 € HT",
+      swikly_link: ds.swiklyLink || "https://v2.swik.link/iX2hc6L",
+      societe: ds.societe || "", societeForme: ds.societeForme || "", societeSiret: ds.societeSiret || "",
+      societeAdresse: ds.societeAdresse || "", societeTva: ds.societeTva || 20,
+      montant_mode: ds.montantMode || "ttc", bailleur: bailleur,
+      rib: ds.rib || { banque:"Qonto", iban:"FR76 1695 8000 0101 6424 3579 697", bic:"QNTOFRP1XXX", id:"qonto" }
+    };
+    try {
+      const docDef = buildContratPdfDef(data);
+      pdfMake.createPdf(docDef).getBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const frame = document.getElementById("signContractFrame");
+        if(frame) frame.src = url;
+      });
+    } catch(e){ console.error("Erreur génération preview signature:", e); }
+  }
+
+  function initSignPad(){
+    const canvas = document.getElementById("signPadCanvas");
+    const wrap = document.getElementById("signPadWrap");
+    const clearBtn = document.getElementById("signPadClearBtn");
+    const acceptCb = document.getElementById("signPadAccept");
+    const statusEl = document.getElementById("signPadStatus");
+    const dlBtn = document.getElementById("signDownloadBtn");
+    if(!canvas || !wrap) return;
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas(){
+      const rect = wrap.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = 160 * dpr;
+      canvas.style.height = "160px";
+      ctx.scale(dpr, dpr);
+      ctx.strokeStyle = "#d5ae4e";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+    }
+    resizeCanvas();
+    window.addEventListener("resize", () => { if(!signHasStrokes) resizeCanvas(); });
+    new ResizeObserver(() => { if(!signHasStrokes && wrap.offsetWidth > 0) resizeCanvas(); }).observe(wrap);
+
+    function getPos(e){
+      const r = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
+    function startDraw(e){ e.preventDefault(); signDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+    function draw(e){ if(!signDrawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); signHasStrokes = true; wrap.classList.add("has-sig"); }
+    function endDraw(){ signDrawing = false; }
+
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mouseleave", endDraw);
+    canvas.addEventListener("touchstart", startDraw, {passive:false});
+    canvas.addEventListener("touchmove", draw, {passive:false});
+    canvas.addEventListener("touchend", endDraw);
+
+    clearBtn.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      signHasStrokes = false;
+      wrap.classList.remove("has-sig");
+      acceptCb.checked = false;
+      statusEl.style.display = "none";
+      dlBtn.disabled = true;
+    });
+
+    function updateDlBtn(){
+      dlBtn.disabled = !(acceptCb.checked && signHasStrokes);
+    }
+    acceptCb.addEventListener("change", () => {
+      if(acceptCb.checked && !signHasStrokes){
+        acceptCb.checked = false;
+        statusEl.innerHTML = "⚠️ Veuillez d'abord dessiner votre signature.";
+        statusEl.style.color = "var(--err)";
+        statusEl.style.display = "block";
+        return;
+      }
+      if(acceptCb.checked){
+        statusEl.innerHTML = "✅ Signature prête — cliquez sur le bouton ci-dessous pour télécharger.";
+        statusEl.style.color = "var(--ok)";
+        statusEl.style.display = "block";
+      } else {
+        statusEl.style.display = "none";
+      }
+      updateDlBtn();
+    });
+
+    dlBtn.addEventListener("click", () => {
+      if(!signHasStrokes || !acceptCb.checked) return;
+      const sigPng = canvas.toDataURL("image/png");
+      const sigDate = new Date().toISOString();
+      window.__clientSignatureData = sigPng;
+      window.__clientSignatureDate = sigDate;
+      generateSignedPdf(signData, sigPng, sigDate);
+    });
+  }
+
+  function generateSignedPdf(ds, sigPng, sigDate){
+    if(typeof buildContratPdfDef !== "function" || typeof pdfMake === "undefined") return;
+    const bailleur = ds.bailleur || { forme:"SASU", siret:"", adresse:"60 rue de Bellechasse, 75007 Paris" };
+    const data = {
+      nom: ds.nom || "", adresse: ds.adresse || "", cni: ds.cni || "",
+      telephone: ds.telephone || "", email: ds.email || "",
+      date_debut: ds.dateDebut || "", heure_debut: ds.heureDebut || "",
+      date_fin: ds.dateFin || "", heure_fin: ds.heureFin || "",
+      personnes_jour: ds.personnesJour || "", personnes_nuit: ds.personnesNuit || "0",
+      total: ds.total || "", acomptes: ds.acomptes || [], solde: ds.solde || "",
+      date_signature: ds.dateSignature || "",
+      has_event: ds.hasEvent || false,
+      date_evenement: ds.dateEvenement || "", personnes_evenement: ds.personnesEvenement || "",
+      heure_evenement_debut: ds.heureEvenementDebut || "", heure_evenement_fin: ds.heureEvenementFin || "",
+      has_extras: (ds.extras || []).length > 0, extras: ds.extras || [], total_extras: ds.totalExtras || "0 € HT",
+      swikly_link: ds.swiklyLink || "https://v2.swik.link/iX2hc6L",
+      societe: ds.societe || "", societeForme: ds.societeForme || "", societeSiret: ds.societeSiret || "",
+      societeAdresse: ds.societeAdresse || "", societeTva: ds.societeTva || 20,
+      montant_mode: ds.montantMode || "ttc", bailleur: bailleur,
+      rib: ds.rib || { banque:"Qonto", iban:"FR76 1695 8000 0101 6424 3579 697", bic:"QNTOFRP1XXX", id:"qonto" }
+    };
+    window.__clientSignatureData = sigPng;
+    window.__clientSignatureDate = sigDate;
+    try {
+      const docDef = buildContratPdfDef(data);
+      const safeName = (data.nom || "Client").replace(/[^A-Za-z0-9 _\-]/g,"").replace(/\s+/g,"_");
+      const fileName = "Contrat_SIGNE_Villa-Mandalika_" + safeName + ".pdf";
+      pdfMake.createPdf(docDef).getBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        showSignDone(ds, fileName);
+      });
+    } catch(e){
+      console.error("Erreur PDF signé:", e);
+      alert("Erreur lors de la génération du PDF : " + e.message);
+    }
+    window.__clientSignatureData = null;
+  }
+
+  function showSignDone(ds, fileName){
+    const padSec = document.getElementById("signPadSection");
+    const doneSec = document.getElementById("signDoneSection");
+    if(padSec) padSec.hidden = true;
+    if(doneSec) doneSec.hidden = false;
+    const mailLink = document.getElementById("signMailtoLink");
+    if(mailLink){
+      const subject = encodeURIComponent("Contrat signé — Villa Mandalika — " + (ds.nom || ""));
+      const body = encodeURIComponent("Bonjour,\n\nVeuillez trouver ci-joint mon contrat signé.\n\nCordialement,\n" + (ds.nom || ""));
+      mailLink.href = "mailto:stevents1912@gmail.com?subject=" + subject + "&body=" + body;
+    }
+    const waLink = document.getElementById("signWhatsappLink");
+    if(waLink){
+      const txt = encodeURIComponent("Bonjour, je vous envoie mon contrat signé pour la Villa Mandalika (" + (ds.dateDebut || "") + " → " + (ds.dateFin || "") + "). Le PDF signé est en pièce jointe.");
+      waLink.href = "https://wa.me/33760755498?text=" + txt;
+    }
+  }
+
+  // Bouton admin : « Envoyer le lien de signature »
+  const signLinkBtn = document.getElementById("cp_sendSignLinkBtn");
+  if(signLinkBtn){
+    signLinkBtn.addEventListener("click", () => {
+      if(!currentContractData){
+        if(typeof toast === "function") toast("Générez d'abord le contrat avant d'envoyer le lien.", "err");
+        return;
+      }
+      const d = currentContractData;
+      const pack = {
+        nom: d.nom, adresse: d.adresse, cni: d.cni, telephone: d.telephone, email: d.email,
+        dateDebut: d.date_debut, dateFin: d.date_fin,
+        heureDebut: d.heure_debut, heureFin: d.heure_fin,
+        personnesJour: d.personnes_jour, personnesNuit: d.personnes_nuit,
+        total: d.total, acomptes: d.acomptes, solde: d.solde,
+        dateSignature: d.date_signature,
+        hasEvent: d.has_event, dateEvenement: d.date_evenement,
+        personnesEvenement: d.personnes_evenement,
+        heureEvenementDebut: d.heure_evenement_debut, heureEvenementFin: d.heure_evenement_fin,
+        extras: d.extras, totalExtras: d.total_extras,
+        swiklyLink: d.swikly_link,
+        societe: d.societe, societeForme: d.societeForme, societeSiret: d.societeSiret,
+        societeAdresse: d.societeAdresse, societeTva: d.societeTva,
+        montantMode: d.montant_mode, bailleur: d.bailleur, rib: d.rib
+      };
+      const b64 = b64encodeUtf8(JSON.stringify(pack));
+      const base = location.origin + location.pathname;
+      const signUrl = base + "#sign=" + b64;
+
+      const clientEmail = ($("email") ? $("email").value.trim() : "") || d.email || "";
+      const clientName = (d.nom || "").split(" ")[0] || "Client";
+
+      const inlineEl = document.getElementById("inlineMailPreview");
+      if(inlineEl){
+        inlineEl.hidden = false;
+        const titleEl = document.getElementById("inlineMailTitle");
+        if(titleEl) titleEl.innerHTML = "✍️ Envoi du lien de signature";
+        const toEl = document.getElementById("inlineMailTo");
+        if(toEl) toEl.value = clientEmail;
+        const subEl = document.getElementById("inlineMailSubject");
+        if(subEl) subEl.value = "Villa Mandalika — Votre contrat de location à signer";
+        const bodyEl = document.getElementById("inlineMailBody");
+        if(bodyEl) bodyEl.value =
+          "Bonjour " + clientName + ",\n\n" +
+          "Veuillez trouver ci-dessous le lien vers votre contrat de location pour la Villa Mandalika.\n\n" +
+          "📋 Cliquez sur le lien suivant pour consulter et signer votre contrat :\n" +
+          signUrl + "\n\n" +
+          "Une fois signé, le contrat sera téléchargé sur votre appareil. Il vous suffira de nous le renvoyer par email ou WhatsApp.\n\n" +
+          "Récapitulatif :\n" +
+          "• Dates : " + (d.date_debut || "—") + " → " + (d.date_fin || "—") + "\n" +
+          "• Montant total : " + (d.total || "—") + " €\n\n" +
+          "Bien cordialement,\nVilla Mandalika\n60 rue de Bellechasse, 75007 Paris\nTél : 07 60 75 54 98";
+
+        const attachInfo = document.getElementById("inlineMailAttachInfo");
+        if(attachInfo) attachInfo.textContent = "Pas de pièce jointe — le client signera en ligne via le lien.";
+
+        const reviewWrap = document.getElementById("inlineMailContractReview");
+        if(reviewWrap) reviewWrap.style.display = "none";
+        const dragWrap = document.getElementById("inlineMailPdfDragWrap");
+        if(dragWrap) dragWrap.hidden = true;
+
+        inlineEl.scrollIntoView({ behavior:"smooth", block:"center" });
+      }
+    });
+  }
+
+  window.__enterSignMode = enterSignMode;
+})();
+
 // === Détection du mode au chargement ===
 (function detectMode(){
   const params = parseHashParams();
-  if(params["client-form"] !== undefined || location.hash.startsWith("#client-form")){
+  if(params.sign !== undefined){
+    if(typeof window.__enterSignMode === "function") window.__enterSignMode(params.sign);
+  } else if(params["client-form"] !== undefined || location.hash.startsWith("#client-form")){
     enterClientMode(params.seed);
   } else if(params.import){
-    // Permet de partager un code via URL : https://.../#import=BASE64
     setTimeout(() => {
       const data = decodeClientCode("STEV1:" + params.import);
       if(data && confirm("Importer la fiche client reçue ?\n\nClient : " + ((data.nom||"") + " " + (data.prenom||"")).trim())){
         applyClientData(data);
         if(typeof switchTab === "function") switchTab("t-identity");
         toast("✅ Fiche client importée.", "ok");
-        // Nettoie l'URL
         history.replaceState(null, "", location.href.split("#")[0]);
       }
     }, 300);
