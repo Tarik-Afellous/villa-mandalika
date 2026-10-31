@@ -6024,12 +6024,14 @@ function saveBailleurConfig(cfg){
   localStorage.setItem(BAILLEUR_KEY, JSON.stringify(cfg));
 }
 function currentBailleurConfig(){
-  return loadBailleurConfig() || {
+  const c = loadBailleurConfig() || {
     forme: "SASU",
     siret: "",
     adresse: "60 rue de Bellechasse, 75007 Paris",
     ribs: [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }]
   };
+  if(!c.ribs) c.ribs = [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }];
+  return c;
 }
 function renderRibs(){
   const cfg = currentBailleurConfig();
