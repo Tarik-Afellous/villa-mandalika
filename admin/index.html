@@ -6171,6 +6171,7 @@ $("bailleurSaveBtn").addEventListener("click", () => {
   }
   resizeCanvas();
   window.addEventListener("resize", () => { if(!hasStrokes) resizeCanvas(); });
+  new ResizeObserver(() => { if(!hasStrokes && wrap.offsetWidth > 0) resizeCanvas(); }).observe(wrap);
 
   function getPos(e){
     const r = canvas.getBoundingClientRect();
