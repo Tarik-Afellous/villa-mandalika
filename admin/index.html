@@ -1988,6 +1988,25 @@
   <!-- ============= ONGLET CONTRAT (génération + contre-signature) ============= -->
   <div class="tab-content" data-tab="t-contract">
   <div id="missingBanner" class="missing-banner"></div>
+
+  <!-- SIGNATURE ÉLECTRONIQUE DU CLIENT -->
+  <section class="card" id="esignSection">
+    <h2><span class="step">✍️</span> Signature électronique du client</h2>
+    <p class="hint">Le client dessine sa signature ci-dessous. Elle sera intégrée automatiquement dans le contrat PDF généré.</p>
+    <div class="sig-pad-wrap" id="clientSigWrap">
+      <canvas id="clientSigCanvas" height="160"></canvas>
+      <div class="sig-placeholder">Dessiner la signature ici</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+      <button type="button" class="ghost" id="clientSigClearBtn" style="padding:6px 14px;font-size:12px">↺ Effacer</button>
+      <label class="checkbox-row" style="margin:0;font-size:13px">
+        <input type="checkbox" id="clientSigAccept">
+        <span>Le client confirme « Lu et approuvé » et accepte les conditions du contrat</span>
+      </label>
+    </div>
+    <div id="clientSigStatus" style="margin-top:8px;font-size:12px;display:none"></div>
+  </section>
+
   <div id="t_contract_layout" style="display:flex;gap:14px;align-items:flex-start">
     <div id="t_contract_left" style="flex:1;min-width:0">
   <div class="actions" style="display:flex;flex-direction:column;gap:8px;align-items:stretch">
@@ -5997,7 +6016,7 @@ function currentBailleurConfig(){
     forme: "SASU",
     siret: "",
     adresse: "60 rue de Bellechasse, 75007 Paris",
-    ribs: [{ ...DEFAULT_RIB }]
+    ribs: [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }]
   };
 }
 function renderRibs(){
