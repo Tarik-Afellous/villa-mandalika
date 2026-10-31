@@ -5280,7 +5280,7 @@ $("waFile").addEventListener("change", async (e) => {
             '&nbsp;&nbsp;&nbsp;→ ' + r.summary + '</div>';
   }
   const okCount = results.filter(r => r.ok).length;
-  html += '<br><span style="color:var(--muted)">Vérifie les champs dans les onglets 1. Identité, 2. Adresse et 3. Informations avant de générer le contrat.</span>';
+  html += '<br><span style="color:var(--muted)">Vérifie les champs dans les onglets 1. Client et 2. Séjour avant de générer le contrat.</span>';
   box.innerHTML = html;
   box.style.display = "block";
   $("waStatus").innerHTML = "✅ " + okCount + "/" + results.length + " document" + (results.length>1?"s":"") + " traité" + (results.length>1?"s":"") + " avec succès.";
@@ -6815,7 +6815,7 @@ function editContractFromHistory(booking, ct){
   window.__autoGenDoneForCurrentEdit = false;
   if(snap && restoreContractForm(snap)){
     if(typeof switchTab === "function") switchTab("t-identity");
-    toast("✏️ Contrat chargé. Corrige les champs, puis va sur « 6. Contrat » pour régénérer.", "ok");
+    toast("✏️ Contrat chargé. Corrige les champs, puis va sur « 4. Contrat » pour régénérer.", "ok");
     return;
   }
   // Ancien contrat sans instantané : on recharge ce qu'on peut depuis la réservation.
@@ -13723,7 +13723,7 @@ function openContractPreview(blob, fileName, data, mode){
         // Nettoie l'adresse (prend la 1re si plusieurs séparées par , ; /) et valide le format.
         const toClean = (String(to || "").split(/[,;\/]/)[0] || "").trim();
         if(!toClean || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toClean)){
-          alert("⚠️ L'adresse e-mail du destinataire est invalide ou vide :\n\n« " + (to || "(vide)") + " »\n\nVérifie l'e-mail du client (onglet « 3. Informations »), puis réessaie.");
+          alert("⚠️ L'adresse e-mail du destinataire est invalide ou vide :\n\n« " + (to || "(vide)") + " »\n\nVérifie l'e-mail du client (onglet « 2. Séjour »), puis réessaie.");
           return;
         }
         const doSend = async () => {
