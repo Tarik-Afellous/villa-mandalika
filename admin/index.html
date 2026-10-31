@@ -11715,6 +11715,7 @@ function exitClientMode(){
     if(!popup && typeof toast === "function") toast("⚠️ Popup bloquée. Autorisez les popups pour ce site.", "err");
   };
   setTimeout(function(){
+    if(document.body.classList.contains("sign-mode")) return;
     var hasPat = !!localStorage.getItem("stevents_sync_pat");
     var hasVision = !!localStorage.getItem("stevents_vision_apikey");
     var hasBackend = !!localStorage.getItem("stevents_gmail_backend_url");
