@@ -11094,6 +11094,78 @@ function exitClientMode(){
 })();
 
 /* ============================================================
+   MIGRATION CROSS-DOMAINE (transfert de paramètres)
+   L'app est servie depuis 2 domaines (stevents-app.pages.dev et
+   villa-mandalika.com). Chaque domaine a son propre localStorage.
+   Ce mécanisme importe les réglages depuis l'autre domaine en un
+   clic via postMessage + popup éphémère.
+   ============================================================ */
+(function(){
+  const TRUSTED = ["https://stevents-app.pages.dev", "https://villa-mandalika.com"];
+  const SETTINGS_KEYS = [
+    "stevents_sync_pat", "stevents_sync_gist", "stevents_sync_auto",
+    "stevents_vision_apikey", "stevents_vision_apikey_safe",
+    "stevents_vision_backend_enabled", "stevents_vision_apikey_saved_at",
+    "stevents_gmail_backend_url", "stevents_gmail_backend_token",
+    "stevents_gmail_client_id", "stevents_gmail_account",
+    "stevents_gh_pat", "stevents_gh_user", "stevents_gh_gist_id",
+    "stevents_swikly_secret", "stevents_swikly_userid", "stevents_swikly_env",
+    "stevents_swikly_amount", "stevents_swikly_lang",
+    "stevents_bailleur", "stevents_signature_b64",
+    "stevents_airbnb_ical", "stevents_booking_ical", "stevents_abritel_ical", "stevents_agoda_ical"
+  ];
+  let popup = null;
+  window.addEventListener("message", function(e){
+    if(!TRUSTED.includes(e.origin) || !e.data || typeof e.data.type !== "string") return;
+    if(e.data.type === "stevents_export_request" && e.source){
+      var data = {};
+      SETTINGS_KEYS.forEach(function(k){ var v = localStorage.getItem(k); if(v !== null) data[k] = v; });
+      e.source.postMessage({ type: "stevents_export_response", data: data }, e.origin);
+      return;
+    }
+    if(e.data.type === "stevents_popup_ready" && popup){
+      popup.postMessage({ type: "stevents_export_request" }, e.origin);
+      return;
+    }
+    if(e.data.type === "stevents_export_response" && e.data.data){
+      var count = 0;
+      Object.entries(e.data.data).forEach(function(entry){
+        if(entry[0].startsWith("stevents_") && entry[1] !== null){ localStorage.setItem(entry[0], entry[1]); count++; }
+      });
+      if(popup){ popup.close(); popup = null; }
+      var b = document.getElementById("migrateBanner"); if(b) b.remove();
+      if(typeof toast === "function") toast("✅ " + count + " paramètres importés. Rechargement…", "ok");
+      setTimeout(function(){ location.reload(); }, 1200);
+    }
+  });
+  if(new URLSearchParams(location.search).get("export-settings") === "1" && window.opener){
+    setTimeout(function(){ window.opener.postMessage({ type: "stevents_popup_ready" }, "*"); }, 600);
+  }
+  window.startSettingsMigration = function(){
+    var from = location.hostname === "villa-mandalika.com"
+      ? "https://stevents-app.pages.dev/?export-settings=1"
+      : "https://villa-mandalika.com/admin/?export-settings=1";
+    popup = window.open(from, "migrate", "width=400,height=200,popup=1");
+    if(!popup && typeof toast === "function") toast("⚠️ Popup bloquée. Autorisez les popups pour ce site.", "err");
+  };
+  setTimeout(function(){
+    var hasPat = !!localStorage.getItem("stevents_sync_pat");
+    var hasVision = !!localStorage.getItem("stevents_vision_apikey");
+    var hasBackend = !!localStorage.getItem("stevents_gmail_backend_url");
+    if(hasPat || hasVision || hasBackend) return;
+    if(!localStorage.getItem("stevents_current_user")) return;
+    var other = location.hostname === "villa-mandalika.com" ? "stevents-app.pages.dev" : "villa-mandalika.com";
+    var banner = document.createElement("div");
+    banner.id = "migrateBanner";
+    banner.style.cssText = "position:fixed;top:52px;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1e3a5f,#2d4a7c);border-bottom:2px solid #d5ae4e;padding:12px 20px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap";
+    banner.innerHTML = '<span style="color:#e2e8f0;font-size:13px">⚠️ Paramètres non trouvés. Si vous utilisiez <strong>' + other + '</strong>, importez vos réglages en un clic.</span>'
+      + '<button onclick="startSettingsMigration()" style="background:#d5ae4e;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">📥 Importer les réglages</button>'
+      + '<button onclick="this.parentElement.remove()" style="background:transparent;color:#94a3b8;border:1px solid #475569;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">Ignorer</button>';
+    document.body.appendChild(banner);
+  }, 2500);
+})();
+
+/* ============================================================
    MULTI-UTILISATEURS + SYNC CLOUD GITHUB GIST
    ============================================================ */
 const USERS_KEY = "stevents_users";
