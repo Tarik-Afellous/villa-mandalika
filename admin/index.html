@@ -11873,6 +11873,57 @@ $("loginSubmit").addEventListener("click", async () => {
   if(el) el.addEventListener("keydown", e => { if(e.key === "Enter") $("loginSubmit").click(); });
 });
 
+// Bouton "J'ai un lien d'invitation" → affiche la zone de saisie
+if($("loginShowInviteBtn")){
+  $("loginShowInviteBtn").addEventListener("click", () => {
+    const zone = $("loginInviteZone");
+    if(zone) zone.style.display = zone.style.display === "none" ? "block" : "none";
+  });
+}
+// Lien "Créer un nouvel espace" → bascule vers le setup
+if($("loginShowSetupLink")){
+  $("loginShowSetupLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    showAuthOverlay("setup");
+  });
+}
+// Bouton "Rejoindre l'équipe" → extrait invite de l'URL collée et l'applique
+if($("loginInviteSubmit")){
+  $("loginInviteSubmit").addEventListener("click", async () => {
+    const raw = ($("loginInviteInput").value || "").trim();
+    if(!raw){ toast("Collez le lien d'invitation reçu de votre administrateur.", "err"); return; }
+    try {
+      const url = new URL(raw);
+      let payload = url.searchParams.get("invite") || "";
+      if(!payload){ const h = new URLSearchParams(url.hash.replace("#","?")); payload = h.get("invite") || ""; }
+      if(!payload) throw new Error("Lien invalide");
+      const txt = b64decodeUtf8(decodeURIComponent(payload));
+      const data = JSON.parse(txt);
+      if(!data.pat || !data.gistId) throw new Error("Lien incomplet");
+      localStorage.setItem(SYNC_PAT_KEY, data.pat);
+      localStorage.setItem(SYNC_GIST_KEY, data.gistId);
+      localStorage.setItem(SYNC_AUTO_KEY, "1");
+      toast("⏳ Connexion à l'équipe en cours…", "ok");
+      const ok = await pullFromCloud(true);
+      if(ok){
+        toast("✅ Réglages importés. Connectez-vous.", "ok");
+        const hint = $("loginFirstTimeHint"); if(hint) hint.style.display = "none";
+        const zone = $("loginInviteZone"); if(zone) zone.style.display = "none";
+        const loginField = url.searchParams.get("login");
+        if(loginField && $("loginUsername")){ $("loginUsername").value = loginField; $("loginPassword").focus(); }
+      } else {
+        toast("⚠️ Impossible de récupérer les données. Vérifiez le lien.", "err");
+      }
+    } catch(err){
+      toast("⚠️ Lien d'invitation invalide : " + err.message, "err");
+    }
+  });
+}
+// Enter key sur le champ invite
+if($("loginInviteInput")){
+  $("loginInviteInput").addEventListener("keydown", e => { if(e.key === "Enter") $("loginInviteSubmit").click(); });
+}
+
 // Lien "Mot de passe oublié ?" : guide l'utilisateur vers son admin.
 // Si on connaît l'email de l'admin (cherché dans la liste des users), on ouvre un mailto pré-rempli.
 if($("forgotPasswordLink")){
