@@ -11847,6 +11847,7 @@ $("loginSubmit").addEventListener("click", async () => {
   const err = $("loginError");
   err.classList.remove("show"); err.textContent = "";
   const users = loadUsers();
+  if(!users.length) { err.textContent = "Aucun compte trouvé sur cet appareil. Importez vos réglages ci-dessous ou créez un nouvel espace."; err.classList.add("show"); var h2 = $("loginFirstTimeHint"); if(h2) h2.style.display = "block"; return; }
   const found = users.find(x => x.username === u);
   if(!found) { err.textContent = "Identifiant inconnu."; err.classList.add("show"); return; }
   const h = await sha256(p);
