@@ -12855,7 +12855,8 @@ async function applyInviteFromHash(){
    try {
      const users = (typeof loadUsers === "function") ? loadUsers() : [];
      if(typeof showAuthOverlay === "function"){
-       showAuthOverlay(users.length === 0 ? "setup" : "login");
+       showAuthOverlay("login");
+       if(users.length === 0){ var fth = document.getElementById("loginFirstTimeHint"); if(fth) fth.style.display = "block"; }
      }
    } catch(e2){ console.error("fallback login a aussi échoué :", e2); }
  }
