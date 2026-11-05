@@ -12759,8 +12759,10 @@ async function applyInviteFromHash(){
       err.classList.add("show");
       return;
     }
-    // Toujours aucun user et pas d'invitation → setup d'admin (premier lancement complet)
-    showAuthOverlay("setup");
+    // Toujours aucun user et pas d'invitation → page de connexion avec options d'import
+    showAuthOverlay("login");
+    var hint = document.getElementById("loginFirstTimeHint");
+    if(hint) hint.style.display = "block";
     return;
   }
   // 5. Sinon, si pas connecté → login
