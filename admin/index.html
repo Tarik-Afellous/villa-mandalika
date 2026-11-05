@@ -802,8 +802,12 @@
   </div>
   <!-- Mode "login" : connexion -->
   <div id="authLogin" class="auth-card" style="display:none">
-    <h1>🏡 Villa Mandalika</h1>
-    <p class="auth-sub">Connecte-toi pour accéder au calendrier et aux contrats.</p>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:serif;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--accent2);margin-bottom:2px">VILLA</div>
+      <div style="font-family:serif;font-size:26px;letter-spacing:3px;font-weight:700;color:#f1f5f9">MANDALIKA</div>
+      <div style="width:40px;height:2px;background:var(--accent2);margin:10px auto 0"></div>
+    </div>
+    <p class="auth-sub">Connectez-vous pour accéder au calendrier et aux contrats.</p>
     <div class="auth-error" id="loginError"></div>
     <div class="auth-row">
       <label>Identifiant</label>
@@ -817,6 +821,23 @@
     <p style="margin-top:14px;font-size:11px;color:var(--muted);text-align:center">
       <a href="#" id="forgotPasswordLink" style="color:var(--accent2);text-decoration:underline;cursor:pointer">Mot de passe oublié ?</a>
     </p>
+    <!-- Section première connexion (visible uniquement quand aucun utilisateur local) -->
+    <div id="loginFirstTimeHint" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08)">
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin:0 0 10px">Première connexion sur cet appareil ?</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button type="button" onclick="startSettingsMigration()" style="background:rgba(213,174,78,0.12);color:var(--accent2);border:1px solid rgba(213,174,78,0.3);padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:center">📥 Importer mes réglages</button>
+        <button type="button" id="loginShowInviteBtn" style="background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid var(--line);padding:10px 14px;border-radius:8px;font-size:12px;cursor:pointer;text-align:center">🔗 J'ai un lien d'invitation</button>
+        <a href="#" id="loginShowSetupLink" style="font-size:11px;color:var(--muted);text-align:center;text-decoration:none;margin-top:4px">Créer un nouvel espace →</a>
+      </div>
+    </div>
+    <!-- Zone de saisie du lien d'invitation (cachée par défaut) -->
+    <div id="loginInviteZone" style="display:none;margin-top:14px">
+      <div class="auth-row">
+        <label>Lien d'invitation</label>
+        <input type="text" id="loginInviteInput" placeholder="Collez le lien reçu de votre administrateur" autocomplete="off" style="font-size:12px">
+      </div>
+      <button type="button" id="loginInviteSubmit" class="primary" style="font-size:13px">Rejoindre l'équipe</button>
+    </div>
   </div>
 </div>
 
