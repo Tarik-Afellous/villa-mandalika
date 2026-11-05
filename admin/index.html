@@ -11743,6 +11743,9 @@ function exitClientMode(){
     var hasVision = !!localStorage.getItem("stevents_vision_apikey");
     var hasBackend = !!localStorage.getItem("stevents_gmail_backend_url");
     if(hasPat || hasVision || hasBackend) return;
+    // Si l'overlay de login est affiché (avec les options d'import dedans), pas besoin de la bannière
+    var authOv = document.getElementById("authOverlay");
+    if(authOv && authOv.style.display !== "none") return;
     var other = location.hostname === "villa-mandalika.com" ? "stevents-app.pages.dev" : "villa-mandalika.com";
     var banner = document.createElement("div");
     banner.id = "migrateBanner";
