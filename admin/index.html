@@ -11888,6 +11888,61 @@ function exitClientMode(){
   }, 2500);
 })();
 
+// === Export / Import presse-papiers (transfert entre appareils) ===
+(function(){
+  const EXPORT_KEYS = [
+    "stevents_users", "stevents_current_user",
+    "stevents_sync_pat", "stevents_sync_gist", "stevents_sync_auto",
+    "stevents_vision_apikey", "stevents_vision_apikey_safe",
+    "stevents_vision_backend_enabled", "stevents_vision_apikey_saved_at",
+    "stevents_vision_model",
+    "stevents_gmail_backend_url", "stevents_gmail_backend_token",
+    "stevents_gmail_client_id", "stevents_gmail_account",
+    "stevents_gh_pat", "stevents_gh_user", "stevents_gh_gist_id",
+    "stevents_swikly_secret", "stevents_swikly_userid", "stevents_swikly_env",
+    "stevents_swikly_amount", "stevents_swikly_lang",
+    "stevents_bailleur", "stevents_signature_b64",
+    "stevents_airbnb_ical", "stevents_booking_ical", "stevents_abritel_ical", "stevents_agoda_ical"
+  ];
+  var expBtn = document.getElementById("exportAllBtn");
+  var impBtn = document.getElementById("importAllBtn");
+  var status = document.getElementById("transfertStatus");
+  if(expBtn) expBtn.addEventListener("click", async function(){
+    var data = {};
+    var count = 0;
+    EXPORT_KEYS.forEach(function(k){ var v = localStorage.getItem(k); if(v !== null){ data[k] = v; count++; } });
+    if(!count){ status.innerHTML = "⚠️ Aucun réglage à exporter sur cet appareil."; return; }
+    var json = JSON.stringify(data);
+    try {
+      await navigator.clipboard.writeText(json);
+      status.innerHTML = "✅ <strong>" + count + " réglages</strong> copiés dans le presse-papiers. Ouvrez l'app sur l'autre appareil → Réglages → « Importer depuis le presse-papiers ».";
+    } catch(e){
+      status.innerHTML = "⚠️ Impossible de copier (le navigateur a bloqué l'accès au presse-papiers).";
+    }
+  });
+  if(impBtn) impBtn.addEventListener("click", async function(){
+    try {
+      var txt = await navigator.clipboard.readText();
+      if(!txt || !txt.trim().startsWith("{")){ status.innerHTML = "⚠️ Le presse-papiers ne contient pas de réglages valides. Cliquez d'abord sur « Exporter » dans l'autre app."; return; }
+      var data = JSON.parse(txt);
+      var count = 0;
+      EXPORT_KEYS.forEach(function(k){ if(data[k] !== undefined){ localStorage.setItem(k, data[k]); count++; } });
+      if(!count){ status.innerHTML = "⚠️ Aucun réglage reconnu dans les données collées."; return; }
+      localStorage.removeItem("stevents_migrate_dismissed");
+      var banner = document.getElementById("migrateBanner");
+      if(banner) banner.remove();
+      status.innerHTML = "✅ <strong>" + count + " réglages</strong> importés avec succès ! Rechargement…";
+      setTimeout(function(){ location.reload(); }, 1200);
+    } catch(e){
+      if(e.name === "NotAllowedError"){
+        status.innerHTML = "⚠️ Accès au presse-papiers refusé. Autorisez l'accès quand le navigateur le demande.";
+      } else {
+        status.innerHTML = "⚠️ Erreur : " + e.message;
+      }
+    }
+  });
+})();
+
 /* ============================================================
    MULTI-UTILISATEURS + SYNC CLOUD GITHUB GIST
    ============================================================ */
