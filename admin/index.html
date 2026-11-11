@@ -1995,6 +1995,22 @@
     <h2><span class="step">B</span> Caution — Swikly</h2>
     <p class="hint">Lien Swikly à transmettre au preneur. Laisse vide pour utiliser le lien permanent par défaut. Génère un lien dédié au client manuellement (Swikly) ou automatiquement (API si configurée dans <em>Réglages</em>).</p>
     <div class="grid">
+      <div>
+        <label>Montant de la caution (€)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="cautionPreset" style="flex:1;background:#0f172a;border:1px solid var(--line);color:var(--txt);padding:10px 12px;border-radius:8px;font-size:14px">
+            <option value="500">500 €</option>
+            <option value="1000">1 000 €</option>
+            <option value="1500">1 500 €</option>
+            <option value="2000" selected>2 000 €</option>
+            <option value="2500">2 500 €</option>
+            <option value="3000">3 000 €</option>
+            <option value="5000">5 000 €</option>
+            <option value="custom">Autre montant…</option>
+          </select>
+          <input type="number" id="cautionCustom" min="100" step="100" placeholder="Montant" style="width:120px;display:none">
+        </div>
+      </div>
       <div style="grid-column:1/-1">
         <label>Lien Swikly pour ce contrat (optionnel)</label>
         <div style="display:flex;gap:8px;align-items:center">
@@ -4009,6 +4025,7 @@ $("genBtn").addEventListener("click", () => {
       extras: extras,
       total_extras: totalExtrasStr,
       swikly_link: ($("swiklyLink").value.trim() || "https://v2.swik.link/iX2hc6L"),
+      caution_amount: getCautionAmount(),
       societe: $("societe").value.trim(),
       societeForme: $("societeForme").value.trim(),
       societeSiret: $("societeSiret").value.trim(),
@@ -5833,7 +5850,9 @@ function buildContratPdfDef(d){
 
   // ========== Caution ==========
   c.push(...articleHeader(nextArt++, 'Caution — empreinte bancaire'));
-  c.push("Le Locataire devra obligatoirement procéder, avant son entrée dans les lieux, à une empreinte bancaire d'un montant de 2 000 € via la plateforme sécurisée SWIKLY, partenaire du Bailleur, en cliquant sur le lien suivant :");
+  const cautionEur = d.caution_amount || 2000;
+  const cautionFmt = new Intl.NumberFormat('fr-FR').format(cautionEur);
+  c.push(`Le Locataire devra obligatoirement procéder, avant son entrée dans les lieux, à une empreinte bancaire d'un montant de ${cautionFmt} € via la plateforme sécurisée SWIKLY, partenaire du Bailleur, en cliquant sur le lien suivant :`);
   const swiklyHref = d.swikly_link || 'https://v2.swik.link/iX2hc6L';
   // Bouton "call to action" cliquable
   c.push({
@@ -7115,7 +7134,7 @@ $("calFilter").addEventListener("change", renderCalendar);
    de contrat. Le bouton « Modifier » de l'historique le recharge
    pour pouvoir corriger une erreur puis régénérer.
    ============================================================ */
-const CONTRACT_FORM_IDS = ["nom","cni","societe","societeForme","societeSiret","societeAdresse","societeTva","adresseRue","adresseCP","adresseVille","email","email2","telephone","telephone2","dateDebut","heureDebut","dateFin","heureFin","personnesJour","personnesNuit","dateSignature","dateEvenement","personnesEvenement","heureEvenementDebut","heureEvenementFin","total","solde","montantMode","ribSelect","swiklyLink"];
+const CONTRACT_FORM_IDS = ["nom","cni","societe","societeForme","societeSiret","societeAdresse","societeTva","adresseRue","adresseCP","adresseVille","email","email2","telephone","telephone2","dateDebut","heureDebut","dateFin","heureFin","personnesJour","personnesNuit","dateSignature","dateEvenement","personnesEvenement","heureEvenementDebut","heureEvenementFin","total","solde","montantMode","ribSelect","swiklyLink","cautionPreset","cautionCustom"];
 
 function captureContractForm(){
   try{
@@ -8803,6 +8822,18 @@ async function sha256Hex(str){
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,"0")).join("");
 }
 
+function getCautionAmount(){
+  const sel = $("cautionPreset");
+  if(sel && sel.value === "custom"){
+    return parseFloat($("cautionCustom").value) || 2000;
+  }
+  return parseFloat(sel ? sel.value : "2000") || 2000;
+}
+$("cautionPreset").addEventListener("change", function(){
+  $("cautionCustom").style.display = this.value === "custom" ? "" : "none";
+  if(this.value !== "custom") $("cautionCustom").value = "";
+});
+
 async function generateSwiklyLink(){
   const userId = localStorage.getItem(SWK_USER);
   const secret = localStorage.getItem(SWK_SECRET);
@@ -8826,7 +8857,7 @@ async function generateSwiklyLink(){
     .trim();
   const firstNameClean = cleanName(prenom);
   const lastNameClean = cleanName(nom_famille);
-  const amountEur = parseFloat($("swiklyAmount").value || localStorage.getItem(SWK_AMOUNT) || "2000");
+  const amountEur = getCautionAmount();
   const amountDeposit = String(Math.round(amountEur * 100));  // en centimes
   const env = localStorage.getItem(SWK_ENV) || "production";
   const base = env === "sandbox"
