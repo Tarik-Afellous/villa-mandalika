@@ -11903,7 +11903,7 @@ function exitClientMode(){
     "stevents_gh_pat", "stevents_gh_user", "stevents_gh_gist_id",
     "stevents_swikly_secret", "stevents_swikly_userid", "stevents_swikly_env",
     "stevents_swikly_amount", "stevents_swikly_lang",
-    "stevents_bailleur", "stevents_signature_b64",
+    "stevents_bailleur", "stevents_signature_b64", "stevents_signature_bailleur",
     "stevents_airbnb_ical", "stevents_booking_ical", "stevents_abritel_ical", "stevents_agoda_ical"
   ];
   var expBtn = document.getElementById("exportAllBtn");
@@ -12547,7 +12547,8 @@ function buildCloudPayload(){
       // bénéficient automatiquement de la connexion Gmail permanente sans avoir à reconfigurer.
       // L'APP_TOKEN est aussi sensible que le PAT GitHub Gist déjà partagé : même modèle de sécurité.
       gmail_backend_url: localStorage.getItem("stevents_gmail_backend_url") || null,
-      gmail_backend_token: localStorage.getItem("stevents_gmail_backend_token") || null
+      gmail_backend_token: localStorage.getItem("stevents_gmail_backend_token") || null,
+      signature_bailleur: localStorage.getItem("stevents_signature_bailleur") || null
     },
     // Comptabilité — toutes les dépenses manuelles
     expenses: (typeof loadExpenses === "function") ? loadExpenses() : []
