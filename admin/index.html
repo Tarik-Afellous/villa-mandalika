@@ -735,6 +735,15 @@
   .tag-menage{background:rgba(244,114,182,0.18);color:#f9a8d4}
   .tag-note{background:rgba(100,116,139,0.18);color:#94a3b8}
   .tag-blocage{background:rgba(100,116,139,0.18);color:#94a3b8}
+  .tag-review-sent{background:rgba(16,185,129,0.18);color:var(--ok)}
+  .review-modal-msg{background:#020617;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--txt);max-height:200px;overflow-y:auto}
+  .review-channel{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px}
+  .review-channel .ch-icon{font-size:20px;flex-shrink:0}
+  .review-channel .ch-label{font-weight:600;font-size:13px;color:var(--txt)}
+  .review-channel .ch-status{font-size:11px;margin-left:auto;font-weight:600}
+  .review-channel .ch-status.ok{color:var(--ok)}
+  .review-channel .ch-status.err{color:var(--err)}
+  .review-channel .ch-status.wait{color:var(--accent2)}
   .booking-modal{position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
   .booking-modal-content{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto}
   .pay-row{display:grid;grid-template-columns:1fr 110px 130px 120px 32px;gap:6px;align-items:center}
