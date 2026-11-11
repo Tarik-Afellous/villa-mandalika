@@ -11828,7 +11828,25 @@ function exitClientMode(){
     popup = window.open(from, "migrate", "width=400,height=200,popup=1");
     if(!popup && typeof toast === "function") toast("⚠️ Popup bloquée. Autorisez les popups pour ce site.", "err");
   };
-  // Bannière de migration retirée (les 2 domaines sont configurés indépendamment)
+  setTimeout(function(){
+    if(document.body.classList.contains("sign-mode")) return;
+    var hasPat = !!localStorage.getItem("stevents_sync_pat");
+    var hasVision = !!localStorage.getItem("stevents_vision_apikey");
+    var hasBackend = !!localStorage.getItem("stevents_gmail_backend_url");
+    if(hasPat || hasVision || hasBackend) return;
+    var authOv = document.getElementById("authOverlay");
+    if(authOv && authOv.style.display !== "none") return;
+    var other = location.hostname === "villa-mandalika.com" ? "stevents-app.pages.dev" : "villa-mandalika.com";
+    var banner = document.createElement("div");
+    banner.id = "migrateBanner";
+    banner.style.cssText = "position:fixed;top:52px;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1e3a5f,#2d4a7c);border-bottom:2px solid #d5ae4e;padding:12px 20px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap";
+    banner.innerHTML = '<span style="color:#e2e8f0;font-size:13px">⚠️ Paramètres non trouvés. Si vous utilisiez <strong>' + other + '</strong>, importez vos réglages en un clic.</span>'
+      + '<button onclick="startSettingsMigration()" style="background:#d5ae4e;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">📥 Importer les réglages</button>'
+      + '<button onclick="this.parentElement.remove()" style="background:transparent;color:#94a3b8;border:1px solid #475569;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">Ignorer</button>';
+    document.body.appendChild(banner);
+    var hint = document.getElementById("setupMigrateHint");
+    if(hint) hint.style.display = "block";
+  }, 2500);
 })();
 
 /* ============================================================
