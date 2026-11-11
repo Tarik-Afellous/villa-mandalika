@@ -16188,17 +16188,26 @@ $("rv_sendBoth").addEventListener("click", async function(){
   }
 });
 
-// ---- Add reviewSentAt tag to bookings list ----
+// ---- Add review tags to bookings list ----
 const __origRenderBookingRow = (typeof renderBookingRow === "function") ? renderBookingRow : null;
 if(__origRenderBookingRow){
   window.renderBookingRow = function(b){
     const row = __origRenderBookingRow.apply(this, arguments);
-    if(b && b.reviewSentAt && row && row.querySelector){
+    if(b && row && row.querySelector){
       const tags = row.querySelector(".b-tags");
-      if(tags){
+      if(tags && b.reviewSentAt){
         const t = document.createElement("span");
         t.className = "booking-tag tag-review-sent";
         t.textContent = "Avis demandé";
+        tags.appendChild(t);
+      } else if(tags && !b.reviewSentAt && b.type === "reservation"
+        && ["airbnb","booking","agoda","abritel","manual"].includes(b.source)
+        && (b.email || b.telephone)
+        && b.dateFin && b.dateFin < new Date().toISOString().slice(0,10)){
+        const t = document.createElement("span");
+        t.className = "booking-tag";
+        t.style.cssText = "background:rgba(251,191,36,0.12);color:#fbbf24;border-color:#fbbf24";
+        t.textContent = "📝 Prêt pour avis";
         tags.appendChild(t);
       }
     }
