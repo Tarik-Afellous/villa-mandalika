@@ -15374,10 +15374,18 @@ function buildGreeting(fullName){
 
 // Signature HTML stylée — palette navy/gold de l'app
 function buildEmailSignatureHtml(){
+  let sigImg = '';
+  try {
+    const sigData = localStorage.getItem('stevents_signature_bailleur');
+    if(sigData && sigData.startsWith('data:image/')){
+      sigImg = '<div style="margin-top:10px"><img src="' + sigData + '" alt="Signature" style="max-height:60px;max-width:200px"></div>';
+    }
+  } catch(e){}
   return '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-collapse:collapse;font-family:Helvetica,Arial,sans-serif">' +
     '<tr><td style="border-top:2px solid #b8924c;padding-top:14px">' +
       '<div style="font-size:20px;font-weight:700;letter-spacing:5px;color:#1a2332">ST EVENTS</div>' +
       '<div style="font-size:9px;letter-spacing:3px;color:#b8924c;font-weight:700;margin-top:4px">LOCATION SAISONNIÈRE &nbsp;&bull;&nbsp; ÉVÉNEMENTIEL</div>' +
+      sigImg +
       '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;border-collapse:collapse;font-size:12px;color:#5a6478;line-height:1.7">' +
         '<tr><td style="padding-right:10px;vertical-align:top">📍</td><td>60 rue de Bellechasse, <strong style="color:#1a2332">75007 PARIS</strong></td></tr>' +
         '<tr><td style="padding-right:10px;vertical-align:top">📞</td><td><a href="tel:+33661059620" style="color:#b8924c;text-decoration:none;font-weight:600">+33 6 61 05 96 20</a></td></tr>' +
