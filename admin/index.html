@@ -11818,15 +11818,36 @@ function exitClientMode(){
       setTimeout(function(){ location.reload(); }, 1200);
     }
   });
-  if(new URLSearchParams(location.search).get("export-settings") === "1" && window.opener){
-    setTimeout(function(){ window.opener.postMessage({ type: "stevents_popup_ready" }, "*"); }, 600);
+  if(new URLSearchParams(location.search).get("export-settings") === "1"){
+    // Page ouverte comme source d'export : répondre au parent (popup ou iframe)
+    var target = window.opener || window.parent;
+    if(target && target !== window){
+      setTimeout(function(){ target.postMessage({ type: "stevents_popup_ready" }, "*"); }, 600);
+    }
   }
   window.startSettingsMigration = function(){
     var from = location.hostname === "villa-mandalika.com"
       ? "https://stevents-app.pages.dev/?export-settings=1"
       : "https://villa-mandalika.com/admin/?export-settings=1";
-    popup = window.open(from, "migrate", "width=400,height=200,popup=1");
-    if(!popup && typeof toast === "function") toast("⚠️ Popup bloquée. Autorisez les popups pour ce site.", "err");
+    // Tenter d'abord via iframe (ne peut pas être bloquée)
+    var iframe = document.createElement("iframe");
+    iframe.style.cssText = "display:none;width:0;height:0;border:0";
+    iframe.src = from;
+    document.body.appendChild(iframe);
+    // Fallback popup si l'iframe ne répond pas dans 5s
+    var iframeTimeout = setTimeout(function(){
+      iframe.remove();
+      popup = window.open(from, "migrate", "width=400,height=200,popup=1");
+      if(!popup && typeof toast === "function") toast("⚠️ Popup bloquée. Autorisez les popups pour ce site.", "err");
+    }, 5000);
+    // Si on reçoit la réponse, annuler le fallback
+    var origHandler = window.onSettingsImported;
+    window.onSettingsImported = function(){
+      clearTimeout(iframeTimeout);
+      iframe.remove();
+      if(origHandler) origHandler();
+    };
+    if(typeof toast === "function") toast("⏳ Import des réglages en cours…", "ok");
   };
   setTimeout(function(){
     if(document.body.classList.contains("sign-mode")) return;
