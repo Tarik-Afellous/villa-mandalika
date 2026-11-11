@@ -11803,8 +11803,8 @@ function exitClientMode(){
       e.source.postMessage({ type: "stevents_export_response", data: data }, e.origin);
       return;
     }
-    if(e.data.type === "stevents_popup_ready" && popup){
-      popup.postMessage({ type: "stevents_export_request" }, e.origin);
+    if(e.data.type === "stevents_popup_ready" && e.source){
+      e.source.postMessage({ type: "stevents_export_request" }, e.origin);
       return;
     }
     if(e.data.type === "stevents_export_response" && e.data.data){
@@ -11813,6 +11813,7 @@ function exitClientMode(){
         if(entry[0].startsWith("stevents_") && entry[1] !== null){ localStorage.setItem(entry[0], entry[1]); count++; }
       });
       if(popup){ popup.close(); popup = null; }
+      if(typeof window.onSettingsImported === "function") window.onSettingsImported();
       var b = document.getElementById("migrateBanner"); if(b) b.remove();
       if(typeof toast === "function") toast("✅ " + count + " paramètres importés. Rechargement…", "ok");
       setTimeout(function(){ location.reload(); }, 1200);
