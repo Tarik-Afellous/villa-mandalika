@@ -2289,6 +2289,22 @@
   <!-- ============= ONGLET RÉGLAGES ============= -->
   <div class="tab-content" data-tab="t-settings">
 
+  <!-- 📦 TRANSFERT ENTRE APPAREILS -->
+  <section class="card" id="transfertSection">
+    <details class="extras-details" open>
+      <summary class="extras-summary-bar">
+        <span class="extras-title"><span class="step">📦</span> Transfert entre appareils</span>
+        <span class="extras-chev">▾</span>
+      </summary>
+      <p class="hint" style="margin-top:14px">Copie tous tes réglages (clés API, sync cloud, Swikly, Gmail, bailleur…) pour les importer sur un autre appareil ou navigateur. Utile pour passer de la PWA à Chrome ou de stevents-app.pages.dev à villa-mandalika.com.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button type="button" class="primary" id="exportAllBtn" style="padding:10px 16px;font-size:13px">📤 Exporter tous mes réglages</button>
+        <button type="button" class="ghost" id="importAllBtn" style="padding:10px 16px;font-size:13px">📥 Importer depuis le presse-papiers</button>
+      </div>
+      <div class="ocr-status" id="transfertStatus" style="margin-top:8px"></div>
+    </details>
+  </section>
+
   <!-- ☁️ SYNC CLOUD (GitHub Gist) -->
   <section class="card">
     <details class="extras-details" id="cloudDetails">
