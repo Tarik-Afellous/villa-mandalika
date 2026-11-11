@@ -11852,6 +11852,7 @@ function exitClientMode(){
   };
   setTimeout(function(){
     if(document.body.classList.contains("sign-mode")) return;
+    if(localStorage.getItem("stevents_migrate_dismissed")) return;
     var hasPat = !!localStorage.getItem("stevents_sync_pat");
     var hasVision = !!localStorage.getItem("stevents_vision_apikey");
     var hasBackend = !!localStorage.getItem("stevents_gmail_backend_url");
@@ -11864,7 +11865,7 @@ function exitClientMode(){
     banner.style.cssText = "position:fixed;top:52px;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1e3a5f,#2d4a7c);border-bottom:2px solid #d5ae4e;padding:12px 20px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap";
     banner.innerHTML = '<span style="color:#e2e8f0;font-size:13px">⚠️ Paramètres non trouvés. Si vous utilisiez <strong>' + other + '</strong>, importez vos réglages en un clic.</span>'
       + '<button onclick="startSettingsMigration()" style="background:#d5ae4e;color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">📥 Importer les réglages</button>'
-      + '<button onclick="this.parentElement.remove()" style="background:transparent;color:#94a3b8;border:1px solid #475569;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">Ignorer</button>';
+      + '<button onclick="localStorage.setItem(\'stevents_migrate_dismissed\',\'1\');this.parentElement.remove()" style="background:transparent;color:#94a3b8;border:1px solid #475569;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">Ignorer</button>';
     document.body.appendChild(banner);
     var hint = document.getElementById("setupMigrateHint");
     if(hint) hint.style.display = "block";
