@@ -2619,6 +2619,39 @@
     </details>
   </section>
 
+  <!-- CONFIG SMS GATEWAY + AVIS CLIENTS -->
+  <section class="card">
+    <details class="extras-details" id="smsGwDetails">
+      <summary class="extras-summary-bar">
+        <span class="extras-title"><span class="step">📱</span> SMS Gateway + Demande d'avis <span class="extras-pill" id="smsGwPill">non configuré</span></span>
+        <span class="extras-chev">▾</span>
+      </summary>
+      <p class="hint" style="margin-top:14px">Envoie des SMS gratuits depuis ton téléphone Android via l'app <strong>SMS Gateway</strong> (<a href="https://sms-gate.app" target="_blank" style="color:var(--accent2)">sms-gate.app</a>). Après chaque séjour, envoie automatiquement un e-mail + SMS au client pour lui demander un avis (Google, Instagram, Airbnb, Booking…).</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div class="grid">
+          <div>
+            <label>Login SMS Gateway</label>
+            <input type="text" id="smsGwLogin" placeholder="login affiché dans l'app">
+          </div>
+          <div>
+            <label>Mot de passe SMS Gateway</label>
+            <input type="password" id="smsGwPass" placeholder="mot de passe affiché dans l'app">
+          </div>
+        </div>
+        <div>
+          <label>Lien Google Avis (pour les clients directs)</label>
+          <input type="url" id="smsGwGoogleLink" placeholder="https://g.page/r/xxx/review">
+          <div class="hint" style="font-size:10px;margin-top:2px">Google Business → Demander des avis → Copier le lien</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button type="button" class="primary" id="smsGwSaveBtn" style="padding:8px 14px;font-size:13px">💾 Enregistrer</button>
+          <button type="button" class="ghost" id="smsGwTestBtn" style="padding:8px 14px;font-size:13px">🧪 Tester (SMS à moi-même)</button>
+          <span id="smsGwStatus" style="font-size:12px;font-weight:600"></span>
+        </div>
+      </div>
+    </details>
+  </section>
+
   <!-- CONFIG VISION API (Claude Anthropic) — OCR de qualité -->
   <section class="card">
     <details class="extras-details" id="visionDetails">
