@@ -12610,6 +12610,9 @@ function applyCloudPayload(data){
       // Mode backend Vision : restauré pour toute l'équipe.
       if(s.vision_backend_enabled) localStorage.setItem("stevents_vision_backend_enabled", s.vision_backend_enabled);
       else localStorage.removeItem("stevents_vision_backend_enabled");
+      if(s.signature_bailleur && !localStorage.getItem("stevents_signature_bailleur")){
+        localStorage.setItem("stevents_signature_bailleur", s.signature_bailleur);
+      }
     }
     // Dépenses comptabilité
     if(Array.isArray(data.expenses)){
