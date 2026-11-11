@@ -15899,6 +15899,338 @@ if(__origRenderCalendar){
     });
   };
 }
+
+// =====================================================================
+//  📝 SYSTÈME DE DEMANDE D'AVIS (e-mail + SMS après séjour)
+// =====================================================================
+const SMS_GW_LOGIN_KEY = "stevents_sms_gw_login";
+const SMS_GW_PASS_KEY  = "stevents_sms_gw_pass";
+const SMS_GW_GOOGLE_KEY = "stevents_sms_gw_google_link";
+
+function smsGwCreds(){
+  return {
+    login: localStorage.getItem(SMS_GW_LOGIN_KEY) || "",
+    pass:  localStorage.getItem(SMS_GW_PASS_KEY) || "",
+    googleLink: localStorage.getItem(SMS_GW_GOOGLE_KEY) || ""
+  };
+}
+function smsGwConfigured(){ const c = smsGwCreds(); return !!(c.login && c.pass); }
+
+// Refresh pill
+function refreshSmsGwPill(){
+  const p = $("smsGwPill");
+  if(!p) return;
+  if(smsGwConfigured()){ p.textContent = "actif"; p.style.background = "rgba(16,185,129,0.15)"; p.style.color = "var(--ok)"; }
+  else { p.textContent = "non configuré"; p.style.background = ""; p.style.color = ""; }
+}
+
+// Load UI
+(function initSmsGwUI(){
+  const c = smsGwCreds();
+  if($("smsGwLogin"))  $("smsGwLogin").value = c.login;
+  if($("smsGwPass"))   $("smsGwPass").value = c.pass;
+  if($("smsGwGoogleLink")) $("smsGwGoogleLink").value = c.googleLink;
+  refreshSmsGwPill();
+})();
+
+// Save
+if($("smsGwSaveBtn")) $("smsGwSaveBtn").addEventListener("click", function(){
+  localStorage.setItem(SMS_GW_LOGIN_KEY, ($("smsGwLogin").value || "").trim());
+  localStorage.setItem(SMS_GW_PASS_KEY,  ($("smsGwPass").value || "").trim());
+  localStorage.setItem(SMS_GW_GOOGLE_KEY, ($("smsGwGoogleLink").value || "").trim());
+  refreshSmsGwPill();
+  toast("Configuration SMS Gateway enregistrée.", "ok");
+  if(typeof pushToCloud === "function") pushToCloud();
+});
+
+// Send SMS via SMS Gateway API
+async function sendSmsGateway(phone, text){
+  const c = smsGwCreds();
+  if(!c.login || !c.pass) throw new Error("SMS Gateway non configuré (Réglages → SMS Gateway).");
+  let num = phone.replace(/[\s.\-()]/g, "");
+  if(num.startsWith("0")) num = "+33" + num.slice(1);
+  if(!num.startsWith("+")) num = "+" + num;
+  const r = await fetch("https://api.sms-gate.app/3rdparty/v1/messages", {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + btoa(c.login + ":" + c.pass),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ textMessage: { text }, phoneNumbers: [num] })
+  });
+  if(!r.ok){
+    const t = await r.text().catch(() => "");
+    throw new Error("SMS Gateway HTTP " + r.status + (t ? " — " + t.slice(0,200) : ""));
+  }
+  return await r.json();
+}
+
+// Test button
+if($("smsGwTestBtn")) $("smsGwTestBtn").addEventListener("click", async function(){
+  const st = $("smsGwStatus");
+  st.textContent = "envoi…"; st.style.color = "var(--accent2)";
+  try {
+    await sendSmsGateway("+33661059620", "Test SMS Gateway depuis l'app Villa Mandalika.");
+    st.textContent = "✅ SMS envoyé !"; st.style.color = "var(--ok)";
+  } catch(e){
+    st.textContent = "❌ " + e.message; st.style.color = "var(--err)";
+  }
+});
+
+// ---- Build review messages per platform ----
+function guestFirstName(title){
+  if(!title) return "";
+  const parts = title.replace(/[-–—]/g, " ").split(/\s+/).filter(Boolean);
+  if(!parts.length) return "";
+  const w = parts[0];
+  return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+}
+
+function reviewMessages(booking){
+  const src = (booking.source || "manual").toLowerCase();
+  const name = guestFirstName(booking.title);
+  const hello = name ? ("Bonjour " + name) : "Bonjour";
+  const googleLink = smsGwCreds().googleLink;
+
+  const platformLabels = { airbnb:"Airbnb", booking:"Booking", agoda:"Agoda", abritel:"Abritel" };
+  const platformLabel = platformLabels[src] || "";
+  const isPlatform = !!platformLabel;
+
+  // SMS : pas de lien (finit en indésirable)
+  let sms;
+  if(isPlatform){
+    sms = hello + ",\n\nMerci d'avoir séjourné à la Villa Mandalika ! Votre avis compte beaucoup pour nous.\n\nPourriez-vous laisser un commentaire sur " + platformLabel + " ?\n\nSi vous avez un instant, un petit avis Google nous aiderait aussi énormément.\n\nMerci et à bientôt !\nVilla Mandalika";
+  } else {
+    sms = hello + ",\n\nMerci d'avoir séjourné à la Villa Mandalika ! Votre avis compte beaucoup pour nous.\n\nPourriez-vous nous laisser un avis sur Google ?\n\nRetrouvez-nous aussi sur Instagram : @villa_mandalika\n\nMerci et à bientôt !\nVilla Mandalika";
+  }
+
+  // E-mail : avec liens
+  let emailSubject = "Merci pour votre séjour à la Villa Mandalika !";
+
+  let emailBody = hello + ",\n\n";
+  emailBody += "Nous espérons que vous avez passé un agréable séjour à la Villa Mandalika.\n\n";
+  emailBody += "Votre satisfaction est notre priorité et votre avis compte beaucoup pour nous.\n\n";
+
+  if(isPlatform){
+    emailBody += "Si vous avez quelques instants, nous serions ravis si vous pouviez :\n\n";
+    emailBody += "• Laisser un commentaire sur votre réservation " + platformLabel + "\n";
+    if(googleLink) emailBody += "• Nous laisser un avis Google : " + googleLink + "\n";
+    emailBody += "• Nous suivre sur Instagram : https://www.instagram.com/villa_mandalika/\n";
+  } else {
+    emailBody += "Si vous avez quelques instants, nous serions ravis si vous pouviez :\n\n";
+    if(googleLink) emailBody += "• Nous laisser un avis Google : " + googleLink + "\n";
+    emailBody += "• Nous suivre sur Instagram : https://www.instagram.com/villa_mandalika/\n";
+  }
+
+  emailBody += "\nChaque avis nous aide à accueillir nos prochains voyageurs dans les meilleures conditions.\n\n";
+  emailBody += "Merci encore et à très bientôt !\n\n";
+  emailBody += "L'équipe Villa Mandalika\n";
+  emailBody += "villa-mandalika.com";
+
+  return { sms, emailSubject, emailBody, platformLabel, isPlatform };
+}
+
+// ---- Open review modal ----
+let _reviewBookingId = null;
+
+function openReviewModal(){
+  if(!editingId) return;
+  const b = bookings.find(x => x.id === editingId);
+  if(!b){ toast("Réservation introuvable.", "err"); return; }
+  _reviewBookingId = b.id;
+
+  const msgs = reviewMessages(b);
+
+  // Client info
+  const info = [];
+  if(b.title) info.push("<strong>" + (typeof escapeHtml === "function" ? escapeHtml(b.title) : b.title) + "</strong>");
+  const srcLbl = { airbnb:"Airbnb", booking:"Booking", agoda:"Agoda", abritel:"Abritel", manual:"Réservation directe" };
+  info.push(srcLbl[b.source] || "Directe");
+  if(b.dateDebut) info.push(b.dateDebut + (b.dateFin ? " → " + b.dateFin : ""));
+  $("reviewClientInfo").innerHTML = info.join(" · ");
+
+  // E-mail
+  $("rv_emailSubject").value = msgs.emailSubject;
+  $("rv_emailPreview").textContent = msgs.emailBody;
+
+  // SMS
+  $("rv_smsPreview").value = msgs.sms;
+  $("rv_smsCount").textContent = msgs.sms.length;
+
+  // Status reset
+  $("rv_chEmailStatus").textContent = b.email ? "" : "⚠️ pas d'email";
+  $("rv_chEmailStatus").className = "ch-status" + (b.email ? "" : " err");
+  $("rv_chEmailLabel").textContent = b.email ? ("E-mail → " + b.email) : "E-mail (adresse manquante)";
+
+  $("rv_chSmsStatus").textContent = b.telephone ? "" : "⚠️ pas de téléphone";
+  $("rv_chSmsStatus").className = "ch-status" + (b.telephone ? "" : " err");
+  $("rv_chSmsLabel").textContent = b.telephone ? ("SMS → " + b.telephone) : "SMS (numéro manquant)";
+
+  if(!smsGwConfigured()){
+    $("rv_chSmsStatus").textContent = "⚠️ SMS Gateway non configuré";
+    $("rv_chSmsStatus").className = "ch-status err";
+  }
+
+  // Previous review?
+  if(b.reviewSentAt){
+    const d = new Date(b.reviewSentAt);
+    $("reviewClientInfo").innerHTML += '<br><span style="color:var(--ok);font-size:11px">✅ Avis déjà demandé le ' + d.toLocaleDateString("fr-FR") + '</span>';
+  }
+
+  $("reviewModal").style.display = "flex";
+}
+
+$("closeReviewModal").addEventListener("click", () => $("reviewModal").style.display = "none");
+$("bk_reviewBtn").addEventListener("click", openReviewModal);
+
+// SMS char counter
+$("rv_smsPreview").addEventListener("input", function(){
+  $("rv_smsCount").textContent = this.value.length;
+});
+
+// ---- Send functions ----
+async function sendReviewEmail(b){
+  const email = b.email;
+  if(!email) throw new Error("Pas d'adresse e-mail pour ce client.");
+  const subject = $("rv_emailSubject").value;
+  const bodyText = $("rv_emailPreview").textContent || $("rv_emailPreview").innerText;
+  const bodyHtml = '<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#1a1a1a">'
+    + bodyText.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,"<br>")
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#b8924c">$1</a>')
+      .replace(/@villa_mandalika/g, '<a href="https://www.instagram.com/villa_mandalika/" style="color:#b8924c">@villa_mandalika</a>')
+    + '</div>';
+  await gmailBackendSend({ to: email, subject, bodyHtml, bodyText });
+}
+
+async function sendReviewSms(b){
+  const phone = b.telephone;
+  if(!phone) throw new Error("Pas de numéro de téléphone pour ce client.");
+  const text = $("rv_smsPreview").value;
+  await sendSmsGateway(phone, text);
+}
+
+function markReviewSent(){
+  const b = bookings.find(x => x.id === _reviewBookingId);
+  if(b){
+    b.reviewSentAt = new Date().toISOString();
+    if(typeof saveBookings === "function") saveBookings();
+    else if(typeof saveBookingsLocal === "function"){ saveBookingsLocal(); if(typeof pushToCloud === "function") pushToCloud(); }
+  }
+}
+
+// E-mail only
+$("rv_sendEmailOnly").addEventListener("click", async function(){
+  const b = bookings.find(x => x.id === _reviewBookingId);
+  if(!b) return;
+  const st = $("rv_chEmailStatus");
+  st.textContent = "envoi…"; st.className = "ch-status wait";
+  try {
+    await sendReviewEmail(b);
+    st.textContent = "✅ envoyé"; st.className = "ch-status ok";
+    markReviewSent();
+    toast("📧 E-mail de demande d'avis envoyé.", "ok");
+  } catch(e){
+    st.textContent = "❌ " + e.message; st.className = "ch-status err";
+    toast("❌ " + e.message, "err");
+  }
+});
+
+// SMS only
+$("rv_sendSmsOnly").addEventListener("click", async function(){
+  const b = bookings.find(x => x.id === _reviewBookingId);
+  if(!b) return;
+  const st = $("rv_chSmsStatus");
+  st.textContent = "envoi…"; st.className = "ch-status wait";
+  try {
+    await sendReviewSms(b);
+    st.textContent = "✅ envoyé"; st.className = "ch-status ok";
+    markReviewSent();
+    toast("📱 SMS de demande d'avis envoyé.", "ok");
+  } catch(e){
+    st.textContent = "❌ " + e.message; st.className = "ch-status err";
+    toast("❌ " + e.message, "err");
+  }
+});
+
+// Both
+$("rv_sendBoth").addEventListener("click", async function(){
+  const b = bookings.find(x => x.id === _reviewBookingId);
+  if(!b) return;
+  const stE = $("rv_chEmailStatus");
+  const stS = $("rv_chSmsStatus");
+  let okE = false, okS = false;
+
+  // E-mail
+  if(b.email){
+    stE.textContent = "envoi…"; stE.className = "ch-status wait";
+    try { await sendReviewEmail(b); stE.textContent = "✅ envoyé"; stE.className = "ch-status ok"; okE = true; }
+    catch(e){ stE.textContent = "❌ " + e.message; stE.className = "ch-status err"; }
+  }
+  // SMS
+  if(b.telephone && smsGwConfigured()){
+    stS.textContent = "envoi…"; stS.className = "ch-status wait";
+    try { await sendReviewSms(b); stS.textContent = "✅ envoyé"; stS.className = "ch-status ok"; okS = true; }
+    catch(e){ stS.textContent = "❌ " + e.message; stS.className = "ch-status err"; }
+  }
+  if(okE || okS){
+    markReviewSent();
+    const parts = [];
+    if(okE) parts.push("📧 e-mail");
+    if(okS) parts.push("📱 SMS");
+    toast("✅ Demande d'avis envoyée (" + parts.join(" + ") + ").", "ok");
+  } else {
+    toast("⚠️ Aucun envoi réussi.", "err");
+  }
+});
+
+// ---- Add reviewSentAt tag to bookings list ----
+const __origRenderBookingRow = (typeof renderBookingRow === "function") ? renderBookingRow : null;
+if(__origRenderBookingRow){
+  window.renderBookingRow = function(b){
+    const row = __origRenderBookingRow.apply(this, arguments);
+    if(b && b.reviewSentAt && row && row.querySelector){
+      const tags = row.querySelector(".b-tags");
+      if(tags){
+        const t = document.createElement("span");
+        t.className = "booking-tag tag-review-sent";
+        t.textContent = "Avis demandé";
+        tags.appendChild(t);
+      }
+    }
+    return row;
+  };
+}
+
+// ---- Sync SMS Gateway config to cloud ----
+const __origBuildPayload = (typeof buildCloudPayload === "function") ? buildCloudPayload : null;
+if(__origBuildPayload){
+  window.buildCloudPayload = function(){
+    const data = __origBuildPayload.apply(this, arguments);
+    if(data && data.settings){
+      data.settings.sms_gw_login = localStorage.getItem(SMS_GW_LOGIN_KEY) || null;
+      data.settings.sms_gw_pass  = localStorage.getItem(SMS_GW_PASS_KEY) || null;
+      data.settings.sms_gw_google_link = localStorage.getItem(SMS_GW_GOOGLE_KEY) || null;
+    }
+    return data;
+  };
+}
+const __origApplyPayload = (typeof applyCloudPayload === "function") ? applyCloudPayload : null;
+if(__origApplyPayload){
+  window.applyCloudPayload = function(data){
+    const r = __origApplyPayload.apply(this, arguments);
+    if(data && data.settings){
+      const s = data.settings;
+      if(s.sms_gw_login) localStorage.setItem(SMS_GW_LOGIN_KEY, s.sms_gw_login);
+      if(s.sms_gw_pass)  localStorage.setItem(SMS_GW_PASS_KEY, s.sms_gw_pass);
+      if(s.sms_gw_google_link) localStorage.setItem(SMS_GW_GOOGLE_KEY, s.sms_gw_google_link);
+      if($("smsGwLogin"))  $("smsGwLogin").value = s.sms_gw_login || "";
+      if($("smsGwPass"))   $("smsGwPass").value = s.sms_gw_pass || "";
+      if($("smsGwGoogleLink")) $("smsGwGoogleLink").value = s.sms_gw_google_link || "";
+      refreshSmsGwPill();
+    }
+    return r;
+  };
+}
 </script>
 </body>
 </html>
