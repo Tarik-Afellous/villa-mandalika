@@ -7959,6 +7959,11 @@ async function silentIcalSync(){
       if(totalAdded > 0) toast("🏠 " + totalAdded + " nouvelle(s) résa importée(s) (" + log.join(", ") + ").", "ok");
       if(purged > 0) console.log("[iCal] " + purged + " ancien(s) blocage(s) générique(s) nettoyés.");
       console.log("[iCal] auto-sync :", log.join(" / "), purged > 0 ? "· purge: " + purged : "");
+      // Enrichir immédiatement les nouvelles résas (nom + tél + e-mail depuis Gmail)
+      if(totalAdded > 0 && typeof silentEnrichPlatforms === "function"){
+        console.log("[iCal] → enrichissement automatique déclenché après import…");
+        setTimeout(silentEnrichPlatforms, 2000);
+      }
     }
   } catch(err){
     console.warn("[iCal] auto-sync échouée :", err.message);
