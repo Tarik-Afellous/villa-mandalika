@@ -14521,6 +14521,18 @@ function openContractPreview(blob, fileName, data, mode){
       } else { toast("Aucun contrat généré.", "err"); }
     });
   }
+  const saveBtn = document.getElementById("cp_saveBtn_inline");
+  if(saveBtn){
+    saveBtn.addEventListener("click", async () => {
+      if(!currentContractBlob){ toast("Aucun contrat généré.", "err"); return; }
+      try {
+        if(typeof ensureBookingFromContract === "function") await ensureBookingFromContract();
+        if(typeof renderAllContracts === "function") renderAllContracts();
+        if(typeof renderCalendar === "function") renderCalendar();
+        toast("✅ Contrat enregistré dans l'historique.", "ok");
+      } catch(e){ console.warn("save-to-history failed:", e); toast("⚠️ Erreur enregistrement.", "err"); }
+    });
+  }
   const edl = document.getElementById("cp_edlBtn_inline");
   if(edl){
     edl.addEventListener("click", () => {
