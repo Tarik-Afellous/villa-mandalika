@@ -11809,7 +11809,7 @@ function exitClientMode(){
     "stevents_gh_pat", "stevents_gh_user", "stevents_gh_gist_id",
     "stevents_swikly_secret", "stevents_swikly_userid", "stevents_swikly_env",
     "stevents_swikly_amount", "stevents_swikly_lang",
-    "stevents_bailleur", "stevents_signature_b64",
+    "stevents_bailleur", "stevents_signature_b64", "stevents_signature_bailleur",
     "stevents_airbnb_ical", "stevents_booking_ical", "stevents_abritel_ical", "stevents_agoda_ical"
   ];
   let popup = null;
@@ -14532,6 +14532,18 @@ function openContractPreview(blob, fileName, data, mode){
         if(typeof renderCalendar === "function") renderCalendar();
         toast("✅ Contrat enregistré dans l'historique.", "ok");
       } catch(e){ console.warn("save-to-history failed:", e); toast("⚠️ Erreur enregistrement.", "err"); }
+    });
+  }
+  const save = document.getElementById("cp_saveBtn_inline");
+  if(save){
+    save.addEventListener("click", async () => {
+      if(!currentContractBlob || !currentContractData){ toast("Aucun contrat généré.", "err"); return; }
+      try {
+        if(typeof ensureBookingFromContract === "function") await ensureBookingFromContract();
+        if(typeof renderAllContracts === "function") renderAllContracts();
+        if(typeof renderCalendar === "function") renderCalendar();
+        toast("✅ Contrat enregistré dans l'historique.", "ok");
+      } catch(e){ console.warn("save-to-history failed:", e); toast("⚠️ Erreur lors de l'enregistrement.", "err"); }
     });
   }
   const edl = document.getElementById("cp_edlBtn_inline");
