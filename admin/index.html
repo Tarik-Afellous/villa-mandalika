@@ -11306,6 +11306,98 @@ setTimeout(showCountersignNotification, 7000);
   }
 })();
 
+// === Notification e-mail : contrat reçu → contresigner ===
+async function notifyCountersignByEmail(booking, filename){
+  try {
+    if(document.body.classList.contains("client-mode")) return;
+    const notifiedKey = "stevents_countersign_notified";
+    const already = JSON.parse(localStorage.getItem(notifiedKey) || "[]");
+    const key = (booking.id || "") + ":" + (filename || "");
+    if(already.includes(key)) return;
+    const be = (typeof gmailBackend === "function") ? gmailBackend() : null;
+    if(!be) return;
+    const nom = booking.title || "(sans nom)";
+    const dates = (booking.dateDebut || "") + (booking.dateFin && booking.dateFin !== booking.dateDebut ? " → " + booking.dateFin : "");
+    const appUrl = "https://villa-mandalika.com/admin/#countersign";
+    const subject = "✍️ Contrat à contresigner — " + nom;
+    const bodyHtml = '<div style="font-family:Helvetica,Arial,sans-serif;max-width:520px">' +
+      '<h2 style="color:#1a2332;margin:0 0 12px">Contrat signé reçu</h2>' +
+      '<p style="font-size:15px;color:#333"><strong>' + (typeof escapeHtml === "function" ? escapeHtml(nom) : nom) + '</strong>' +
+      (dates ? ' <span style="color:#666">(' + dates + ')</span>' : '') +
+      ' a renvoyé son contrat signé.</p>' +
+      '<p style="font-size:14px;color:#555">Fichier : ' + (typeof escapeHtml === "function" ? escapeHtml(filename) : filename) + '</p>' +
+      '<p style="margin-top:20px"><a href="' + appUrl + '" style="display:inline-block;padding:12px 24px;background:#22d3ee;color:#0c4a4f;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px">✍️ Contresigner maintenant</a></p>' +
+      '<p style="margin-top:16px;font-size:12px;color:#999">ST EVENTS — Villa Mandalika</p></div>';
+    const bodyText = "Contrat signé reçu de " + nom + (dates ? " (" + dates + ")" : "") +
+      "\nFichier : " + filename +
+      "\n\nContresigner : " + appUrl;
+    await gmailBackendSend({ to: "stevents1912@gmail.com", subject, bodyHtml, bodyText });
+    already.push(key);
+    if(already.length > 100) already.splice(0, already.length - 50);
+    localStorage.setItem(notifiedKey, JSON.stringify(already));
+    console.log("[countersign-notify] e-mail envoyé pour", nom);
+  } catch(err){ console.warn("[countersign-notify] échec:", err); }
+}
+
+// === Auto-traitement silencieux : quand le scan auto détecte un PDF signé matchant un booking ===
+async function autoProcessSignedContracts(items, tokenForDirect){
+  try {
+    if(document.body.classList.contains("client-mode")) return;
+    const be = (typeof gmailBackend === "function") ? gmailBackend() : null;
+    for(const item of items){
+      for(const att of (item.attachments || [])){
+        if(att.kind !== "pdf") continue;
+        const matchedBooking = findBookingByContractFilename(att.filename);
+        if(!matchedBooking) continue;
+        const alreadyHas = (matchedBooking.contracts || []).some(c => c && c.filename === att.filename);
+        if(alreadyHas) continue;
+        try {
+          let b64;
+          if(be){
+            const r = await fetch(be.url + "/gmail/attachment?messageId=" + encodeURIComponent(item.messageId) + "&attachmentId=" + encodeURIComponent(att.attachmentId), {
+              headers: { "X-App-Token": be.token }
+            });
+            const j = await r.json();
+            if(!r.ok) continue;
+            b64 = (j.data || "").replace(/-/g, "+").replace(/_/g, "/");
+          } else if(tokenForDirect){
+            const r = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/" + item.messageId + "/attachments/" + att.attachmentId, {
+              headers: { "Authorization": "Bearer " + tokenForDirect }
+            });
+            if(!r.ok) continue;
+            const j = await r.json();
+            b64 = (j.data || "").replace(/-/g, "+").replace(/_/g, "/");
+          } else { continue; }
+          const bin = atob(b64);
+          const bytes = new Uint8Array(bin.length);
+          for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          const reader = new FileReader();
+          const pdfB64 = await new Promise((resolve) => {
+            reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+            reader.onerror = () => resolve("");
+            reader.readAsDataURL(blob);
+          });
+          matchedBooking.contracts = matchedBooking.contracts || [];
+          matchedBooking.contracts.push({
+            id: "ct_gmail_" + Date.now().toString(36),
+            type: "signe_client",
+            filename: att.filename,
+            generatedAt: new Date().toISOString(),
+            pdfBase64: pdfB64,
+            receivedViaGmail: true
+          });
+          if(typeof saveBookings === "function") saveBookings();
+          if(typeof renderCalendar === "function") renderCalendar();
+          if(typeof renderBookings === "function") renderBookings();
+          toast("📬 Contrat signé reçu de « " + matchedBooking.title + " » — à contresigner !", "ok");
+          notifyCountersignByEmail(matchedBooking, att.filename);
+        } catch(e){ console.warn("[auto-countersign]", att.filename, e); }
+      }
+    }
+  } catch(err){ console.warn("[auto-countersign] erreur globale:", err); }
+}
+
 // Télécharge une pièce jointe Gmail et la route selon son type (.stev → import, .pdf → contre-signature)
 // Cherche le booking dont le titre matche le mieux les tokens du nom de fichier.
 // Pattern attendu : "Contrat_ST-EVENTS_NOM_Prenom_..._dd-mm-yyyy.pdf"
