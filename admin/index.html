@@ -12012,6 +12012,13 @@ function exitClientMode(){
         history.replaceState(null, "", location.href.split("#")[0]);
       }
     }, 300);
+  } else if(location.hash === "#countersign" || params.countersign !== undefined){
+    setTimeout(() => {
+      if(typeof switchTab === "function") switchTab("t-prefill");
+      const csDetails = document.getElementById("csDetails");
+      if(csDetails){ csDetails.open = true; setTimeout(() => csDetails.scrollIntoView({behavior:"smooth", block:"center"}), 200); }
+      history.replaceState(null, "", location.href.split("#")[0]);
+    }, 600);
   }
 })();
 
