@@ -11102,6 +11102,9 @@ function renderReceptionItems(items, silent, tokenForDirect){
   if(silent && (nbStev + nbPdf) > 0 && typeof toast === "function"){
     toast("📬 " + (nbStev + nbPdf) + " pièce(s) reçue(s) par email — onglet Documents → Réception.", "ok");
   }
+  if(silent && nbPdf > 0 && typeof autoProcessSignedContracts === "function"){
+    autoProcessSignedContracts(items, tokenForDirect);
+  }
   if(results){
     results.hidden = false;
     results.innerHTML = "<strong style='color:var(--accent2);font-size:12px'>📬 " + items.length + " email(s) · " + nbStev + " dossier(s) .stev · " + nbPdf + " PDF :</strong>";
@@ -11483,6 +11486,7 @@ async function receiveGmailAttachment(messageId, att, token){
           if(typeof renderCalendar === "function") renderCalendar();
           if(typeof renderBookings === "function") renderBookings();
           toast("✅ Contrat signé attaché à « " + matchedBooking.title + " » — statut « contrat reçu » (cyan). Tu peux contresigner.", "ok");
+          if(typeof notifyCountersignByEmail === "function") notifyCountersignByEmail(matchedBooking, att.filename);
         } else {
           toast("ℹ️ Ce contrat est déjà attaché à « " + matchedBooking.title + " ».", "ok");
         }
