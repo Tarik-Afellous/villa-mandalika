@@ -8014,6 +8014,40 @@ async function silentIcalSync(){
 // Déclencheurs : démarrage (après 8s, pour laisser l'init finir) + toutes les 15 min + au focus
 setTimeout(silentIcalSync, 8000);
 setInterval(silentIcalSync, 15 * 60 * 1000);
+
+// === Garde-fou automatique : vérifie et répare les données au démarrage ===
+setTimeout(async function healthcheck(){
+  if(document.body.classList.contains("client-mode")) return;
+  const fixes = [];
+  try {
+    let bookings = JSON.parse(localStorage.getItem('stevents_bookings') || '[]');
+    const before = bookings.length;
+    bookings = bookings.filter(b => b.dateDebut && b.dateFin);
+    if(bookings.length < before){
+      localStorage.setItem('stevents_bookings', JSON.stringify(bookings));
+      fixes.push((before - bookings.length) + " résa(s) sans dates supprimée(s)");
+    }
+    if(bookings.length === 0 && typeof loadSyncCfg === "function"){
+      const cfg = loadSyncCfg();
+      if(cfg.pat && cfg.gistId){
+        const ok = await pullFromCloud(true);
+        if(ok){
+          const after = JSON.parse(localStorage.getItem('stevents_bookings') || '[]');
+          if(after.length > 0) fixes.push("données restaurées depuis le cloud (" + after.length + " résas)");
+        }
+      }
+    }
+    const icalKeys = ['stevents_airbnb_ical','stevents_booking_ical','stevents_agoda_ical','stevents_abritel_ical'];
+    const missing = icalKeys.filter(k => !localStorage.getItem(k)).map(k => k.replace('stevents_','').replace('_ical',''));
+    if(missing.length > 0 && missing.length < 4) fixes.push("iCal manquant : " + missing.join(", "));
+    if(fixes.length > 0){
+      if(typeof renderCalendar === "function") renderCalendar();
+      if(typeof renderBookings === "function") renderBookings();
+      toast("🔧 Auto-repair : " + fixes.join(" · "), "ok");
+      console.log("[healthcheck]", fixes);
+    }
+  } catch(e){ console.warn("[healthcheck] erreur :", e); }
+}, 12000);
 window.addEventListener("focus", () => {
   // Sync au retour sur la PWA si la dernière sync date de > 10 min
   if(!window.__icalLastFocusSync || Date.now() - window.__icalLastFocusSync > 10 * 60 * 1000){
