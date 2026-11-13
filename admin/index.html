@@ -15010,23 +15010,40 @@ function openContractPreview(blob, fileName, data, mode){
     mail.addEventListener("click", () => {
       if(!currentContractBlob || !currentContractData){ alert("⚠️ Aucun contrat à envoyer (génère-le d'abord)."); return; }
       const d = currentContractData;
-      // On lit l'email en direct depuis les champs (priorité au champ principal, fallback sur d.email)
       const rawEmail = getClientEmail() || (d.email || "").split(/[,;\/]/)[0].trim();
       const greeting = (typeof buildGreeting === "function") ? buildGreeting(d.nom) : "Bonjour";
       const isDevis = (currentContractFileName || "").toLowerCase().startsWith("devis");
       const subject = ((isDevis ? "Devis" : "Contrat de location") + " — Villa Mandalika" + ((d.nom || "").trim() ? " — " + (d.nom || "").trim() : ((d.date_debut || "").trim() ? " — " + (d.date_debut || "").trim() + (d.date_fin && d.date_fin !== d.date_debut ? " → " + d.date_fin : "") : "")));
+      // Génération du lien de signature en ligne
+      const pack = {
+        nom: d.nom, adresse: d.adresse, cni: d.cni, telephone: d.telephone, email: d.email,
+        dateDebut: d.date_debut, dateFin: d.date_fin,
+        heureDebut: d.heure_debut, heureFin: d.heure_fin,
+        personnesJour: d.personnes_jour, personnesNuit: d.personnes_nuit,
+        total: d.total, acomptes: d.acomptes, solde: d.solde,
+        dateSignature: d.date_signature,
+        hasEvent: d.has_event, dateEvenement: d.date_evenement,
+        personnesEvenement: d.personnes_evenement,
+        heureEvenementDebut: d.heure_evenement_debut, heureEvenementFin: d.heure_evenement_fin,
+        extras: d.extras, totalExtras: d.total_extras,
+        swiklyLink: d.swikly_link,
+        societe: d.societe, societeForme: d.societeForme, societeSiret: d.societeSiret,
+        societeAdresse: d.societeAdresse, societeTva: d.societeTva,
+        montantMode: d.montant_mode, bailleur: d.bailleur, rib: d.rib
+      };
+      const signUrl = location.origin + location.pathname + "#sign=" + b64encodeUtf8(JSON.stringify(pack));
       const body = isDevis
         ? (greeting + ",\n\nJe vous prie de trouver ci-joint le devis pour la location de la Villa Mandalika du " + (d.date_debut || "") +
            (d.date_fin && d.date_fin !== d.date_debut ? " au " + d.date_fin : "") + ".\n\nN'hésitez pas à revenir vers moi pour toute question. Si le devis vous convient, nous établirons un contrat avec acompte pour confirmer la réservation.\n\nCordialement,")
-        : (greeting + ",\n\nJe vous prie de trouver ci-joint le contrat de location de la Villa Mandalika pour votre réservation du " + (d.date_debut || "") +
-           (d.date_fin && d.date_fin !== d.date_debut ? " au " + d.date_fin : "") + ".\n\nMerci de bien vouloir le relire, le signer et nous le retourner. Veuillez également nous faire parvenir l'acompte de règlement qui nous permettra de bloquer définitivement vos dates de séjour.\n\nPour toute question, vous pouvez nous joindre par WhatsApp ou par email.\n\nCordialement,");
+        : (greeting + ",\n\nVeuillez trouver ci-joint votre contrat de location de la Villa Mandalika pour votre séjour du " + (d.date_debut || "") +
+           (d.date_fin && d.date_fin !== d.date_debut ? " au " + d.date_fin : "") + ".\n\nPour le consulter et le signer en ligne, cliquez sur le lien ci-dessous :\n" + signUrl + "\n\nVeuillez également nous faire parvenir l'acompte de règlement qui nous permettra de bloquer définitivement vos dates de séjour.\n\nPour toute question, n'hésitez pas à nous contacter par WhatsApp ou par email.\n\nCordialement,");
       showInlineMailPreview({
         mode: "gmail",
         title: "📧 Aperçu de l'email Gmail",
         to: rawEmail,
         subject: subject,
         body: body,
-        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat.pdf") + "  ·  ✨ Signature ST EVENTS ajoutée automatiquement"
+        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat.pdf") + "  +  ✍️ Lien de signature inclus dans le message  ·  ✨ Signature ST EVENTS ajoutée automatiquement"
       });
     });
   }
