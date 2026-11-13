@@ -2161,7 +2161,7 @@
     <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:8px">Envoyer au client</div>
     <button type="button" class="primary" id="cp_sendMailBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left">📧 Envoyer par Gmail</button>
     <button type="button" class="ghost" id="cp_sendWhatsBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;background:rgba(34,197,94,0.12);border-color:var(--ok);color:#a7f3d0">💬 Envoyer par WhatsApp</button>
-    <button type="button" class="ghost" id="cp_sendSignLinkBtn" style="padding:10px 14px;font-size:13px;text-align:left;background:rgba(184,146,76,0.10);border-color:var(--accent2);color:var(--accent2)">✍️ Envoyer le lien de signature</button>
+    <!-- Bouton signature supprimé : le lien de signature est désormais inclus dans l'email Gmail -->
     <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:8px">Après réception</div>
     <button type="button" class="ghost" id="cp_countersignBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;background:rgba(184,146,76,0.15);border-color:var(--accent2);color:var(--accent2)">✍️ Contrat contresigné</button>
     <!-- Zone d'aperçu mail/whatsapp directement sous les boutons (au lieu de modale) -->
@@ -5959,35 +5959,32 @@ function buildContratPdfDef(d){
   // ========== Caution ==========
   c.push(...articleHeader(nextArt++, 'Caution — empreinte bancaire'));
   const cautionEur = d.caution_amount || 2000;
-  const cautionFmt = new Intl.NumberFormat('fr-FR').format(cautionEur);
+  const cautionFmt = cautionEur.toLocaleString('fr-FR').replace(/ /g, ' ');
   c.push(`Le Locataire devra obligatoirement procéder, avant son entrée dans les lieux, à une empreinte bancaire d'un montant de ${cautionFmt} € via la plateforme sécurisée SWIKLY, partenaire du Bailleur, en cliquant sur le lien suivant :`);
   const swiklyHref = d.swikly_link || 'https://v2.swik.link/iX2hc6L';
-  // Bouton "call to action" cliquable
   c.push({
     table: { widths: ['*'], body: [[{
-      text: 'DÉPOSER LA CAUTION  →',
+      text: [
+        { text: '➤  ', fontSize: 14, color: '#fff' },
+        { text: 'CLIQUEZ ICI POUR DÉPOSER LA CAUTION', bold: true, fontSize: 13, color: '#fff', characterSpacing: 1.5 }
+      ],
       link: swiklyHref,
-      color: '#fff', bold: true, fontSize: 12, characterSpacing: 2,
       alignment: 'center',
       fillColor: NAVY,
-      margin: [0, 14, 0, 14],
+      margin: [0, 16, 0, 16],
       border: [false, false, false, false]
     }]] },
     layout: { defaultBorder: false },
-    margin: [0, 10, 0, 6]
-  });
-  // Lien complet bien visible dans une boîte sélectionnable (pour copier-coller)
-  c.push({
-    text: 'ou copier le lien directement :',
-    color: SOFT, fontSize: 8, italics: true, alignment: 'center',
-    margin: [0, 2, 0, 4]
+    margin: [0, 12, 0, 8]
   });
   c.push({
     table: { widths: ['*'], body: [[{
-      text: swiklyHref,
-      link: swiklyHref,
-      color: NAVY, fontSize: 8, alignment: 'center',
-      margin: [6, 8, 6, 8]
+      text: [
+        { text: '📋  Copier le lien :  ', color: NAVY, fontSize: 8.5, bold: true },
+        { text: swiklyHref, link: swiklyHref, color: GOLD, fontSize: 8.5, decoration: 'underline' }
+      ],
+      alignment: 'center',
+      margin: [8, 8, 8, 8]
     }]] },
     layout: {
       defaultBorder: true,
