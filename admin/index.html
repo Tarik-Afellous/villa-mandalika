@@ -14929,11 +14929,14 @@ function openContractPreview(blob, fileName, data, mode){
     if(mode === "whatsapp"){
       document.getElementById("inlineMailToLabel").textContent = "Numéro WhatsApp (33612345678) ou laisse vide pour choisir le contact";
       document.getElementById("inlineMailSubjectRow").style.display = "none";
+    } else if(mode === "sms"){
+      document.getElementById("inlineMailToLabel").textContent = "Numéro de téléphone";
+      document.getElementById("inlineMailSubjectRow").style.display = "none";
     } else {
       document.getElementById("inlineMailToLabel").textContent = "Destinataire (email)";
       document.getElementById("inlineMailSubjectRow").style.display = "";
     }
-    document.getElementById("inlineMailSendBtn").textContent = mode === "whatsapp" ? "💬 Ouvrir WhatsApp" : "📨 Envoyer";
+    document.getElementById("inlineMailSendBtn").textContent = mode === "sms" ? "📱 Envoyer par SMS" : mode === "whatsapp" ? "💬 Ouvrir WhatsApp" : "📨 Envoyer";
     document.getElementById("inlineMailPreview").hidden = false;
     // === Charge l'aperçu PDF du contrat dans l'iframe pour relecture avant envoi ===
     const reviewSection = document.getElementById("inlineMailContractReview");
