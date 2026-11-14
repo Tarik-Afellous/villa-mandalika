@@ -2139,31 +2139,28 @@
   <div id="t_contract_layout" style="display:flex;gap:14px;align-items:flex-start">
     <div id="t_contract_left" style="flex:1;min-width:0">
   <div class="actions" style="display:flex;flex-direction:column;gap:8px;align-items:stretch">
-    <button class="ghost" id="resetBtn" style="align-self:flex-start;padding:6px 12px;font-size:12px">Réinitialiser</button>
-    <!-- ✅ Valider & classer le contrat dans l'Historique, puis vider le formulaire -->
-    <div style="margin-top:10px;padding:12px;background:rgba(34,197,94,0.07);border:1px solid var(--ok);border-radius:8px">
-      <div style="font-size:12px;font-weight:700;color:#a7f3d0;margin-bottom:2px">✅ Valider &amp; enregistrer</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Classe ce contrat dans l'<strong>Historique</strong>, puis <strong>vide le formulaire</strong> pour le client suivant.</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button type="button" class="ghost" id="finalizeBrouillonBtn" style="flex:1;min-width:88px;padding:9px 6px;font-size:12px" title="Enregistre en brouillon (non envoyé) et vide le formulaire">📝 Brouillon</button>
-        <button type="button" class="ghost" id="finalizeContratBtn" style="flex:1;min-width:88px;padding:9px 6px;font-size:12px;border-color:var(--accent2);color:var(--accent2)" title="Enregistre comme contrat et vide le formulaire">📄 Contrat</button>
-        <button type="button" class="ghost" id="finalizeDevisBtn" style="flex:1;min-width:88px;padding:9px 6px;font-size:12px;border-color:#c084fc;color:#e9d5ff" title="Enregistre comme devis envoyé et vide le formulaire">📋 Devis envoyé</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">Le contrat s'ajoute automatiquement au calendrier dès sa génération (statut « devis envoyé »). Si le client ne confirme pas :</div>
-      <button type="button" class="ghost" id="removeFromCalBtn" style="margin-top:6px;width:100%;padding:9px;font-size:12px;color:var(--err);border-color:var(--err)" title="Retire cette réservation (et son contrat) du calendrier">🗑️ Retirer ce contrat du calendrier</button>
-    </div>
-    <!-- Boutons d'actions sur le contrat (visibles dès qu'un PDF est généré) -->
-    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:14px">Actions sur le contrat</div>
+    <!-- Envoi au client : section principale -->
+    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase">Envoyer au client</div>
+    <button type="button" class="primary" id="cp_sendMailBtn_inline" style="padding:12px 14px;font-size:13px;text-align:left">📧 Envoyer par Gmail</button>
+    <button type="button" class="ghost" id="cp_sendSmsBtn_inline" style="padding:12px 14px;font-size:13px;text-align:left;background:rgba(56,189,248,0.10);border-color:#38bdf8;color:#7dd3fc">📱 Envoyer par SMS</button>
+    <button type="button" class="ghost" id="cp_sendWhatsBtn_inline" style="padding:12px 14px;font-size:13px;text-align:left;background:rgba(34,197,94,0.12);border-color:var(--ok);color:#a7f3d0">💬 Envoyer par WhatsApp</button>
+    <!-- Actions sur le contrat -->
+    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:10px">Actions</div>
     <button type="button" class="ghost" id="cp_downloadBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left">📥 Télécharger le PDF</button>
     <button type="button" class="ghost" id="cp_saveBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;border-color:var(--ok);color:#a7f3d0">💾 Enregistrer</button>
-    <button type="button" class="ghost" id="cp_saveBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;border-color:var(--ok);color:#a7f3d0">💾 Enregistrer</button>
     <button type="button" class="ghost" id="cp_edlBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;display:none;border-color:var(--accent2);color:var(--accent2)">📋 État des lieux</button>
-    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:8px">Envoyer au client</div>
-    <button type="button" class="primary" id="cp_sendMailBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left">📧 Envoyer par Gmail</button>
-    <button type="button" class="ghost" id="cp_sendWhatsBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;background:rgba(34,197,94,0.12);border-color:var(--ok);color:#a7f3d0">💬 Envoyer par WhatsApp</button>
-    <!-- Bouton signature supprimé : le lien de signature est désormais inclus dans l'email Gmail -->
-    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:8px">Après réception</div>
     <button type="button" class="ghost" id="cp_countersignBtn_inline" style="padding:10px 14px;font-size:13px;text-align:left;background:rgba(184,146,76,0.15);border-color:var(--accent2);color:var(--accent2)">✍️ Contrat contresigné</button>
+    <!-- Zone de gestion -->
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button type="button" class="ghost" id="removeFromCalBtn" style="flex:1;padding:8px 12px;font-size:12px;color:var(--err);border-color:var(--err)" title="Retire cette réservation du calendrier">🗑️ Retirer du calendrier</button>
+      <button class="ghost" id="resetBtn" style="flex:1;padding:8px 12px;font-size:12px" title="Vider le formulaire">↺ Réinitialiser</button>
+    </div>
+    <!-- Boutons Brouillon/Contrat/Devis masqués (gardés pour la logique interne) -->
+    <div style="display:none">
+      <button id="finalizeBrouillonBtn"></button>
+      <button id="finalizeContratBtn"></button>
+      <button id="finalizeDevisBtn"></button>
+    </div>
     <!-- Zone d'aperçu mail/whatsapp directement sous les boutons (au lieu de modale) -->
     <div id="inlineMailPreview" hidden style="margin-top:14px;padding:12px;background:#0f172a;border:1px solid var(--accent2);border-radius:8px;display:flex;flex-direction:column;gap:8px">
       <div style="display:flex;align-items:center;justify-content:space-between">
