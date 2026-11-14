@@ -12875,24 +12875,46 @@ function applyCloudPayload(data){
 function saveBookingsLocal(){
   localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
 }
+// Repo-based sync config (private repo, sync branch — never deployed to Cloudflare Pages)
+const SYNC_REPO = "Tarik-Afellous/stevents-app";
+const SYNC_BRANCH = "sync";
+const SYNC_REPO_PATH = "stevents-data.json";
+const SYNC_REPO_API = "https://api.github.com/repos/" + SYNC_REPO + "/contents/" + SYNC_REPO_PATH;
+let __syncFileSha = null; // SHA of the current file (needed for updates)
+
+async function ensureSyncBranch(pat){
+  const h = { "Authorization": "Bearer " + pat, "Accept": "application/vnd.github+json" };
+  const r = await fetch("https://api.github.com/repos/" + SYNC_REPO + "/git/ref/heads/" + SYNC_BRANCH, { headers: h });
+  if(r.ok) return true;
+  if(r.status !== 404) return false;
+  const mainRef = await fetch("https://api.github.com/repos/" + SYNC_REPO + "/git/ref/heads/main", { headers: h });
+  if(!mainRef.ok) return false;
+  const mainData = await mainRef.json();
+  const cr = await fetch("https://api.github.com/repos/" + SYNC_REPO + "/git/refs", {
+    method: "POST", headers: { ...h, "Content-Type": "application/json" },
+    body: JSON.stringify({ ref: "refs/heads/" + SYNC_BRANCH, sha: mainData.object.sha })
+  });
+  return cr.ok || cr.status === 422;
+}
+
 async function pullFromCloud(silent){
   const cfg = loadSyncCfg();
-  if(!cfg.pat || !cfg.gistId) return false;
+  if(!cfg.pat) return false;
+  // Support legacy Gist mode if gistId is set
+  if(cfg.gistId) return pullFromCloudGist(silent);
   setSyncStatus("⏳ Téléchargement…", "syncing");
   try {
-    const r = await fetch("https://api.github.com/gists/" + cfg.gistId, {
+    const r = await fetch(SYNC_REPO_API + "?ref=" + SYNC_BRANCH, {
       headers: { "Authorization": "Bearer " + cfg.pat, "Accept": "application/vnd.github+json" }
     });
+    if(r.status === 404){
+      if(!silent) setSyncStatus("ℹ️ Aucune donnée cloud trouvée (premier sync).", "ok");
+      return false;
+    }
     if(!r.ok) throw new Error("HTTP " + r.status);
     const j = await r.json();
-    const f = j.files && j.files[SYNC_FILENAME];
-    if(!f){ throw new Error("Fichier de données introuvable dans le Gist."); }
-    let content = f.content;
-    // Si Gist tronque, on récupère raw_url
-    if(f.truncated && f.raw_url){
-      const rr = await fetch(f.raw_url);
-      content = await rr.text();
-    }
+    __syncFileSha = j.sha;
+    const content = atob(j.content.replace(/\n/g, ""));
     const data = JSON.parse(content);
     applyCloudPayload(data);
     localStorage.setItem(SYNC_LAST_KEY, new Date().toISOString());
@@ -12905,10 +12927,89 @@ async function pullFromCloud(silent){
     return false;
   }
 }
+
+async function pullFromCloudGist(silent){
+  const cfg = loadSyncCfg();
+  if(!cfg.pat || !cfg.gistId) return false;
+  setSyncStatus("⏳ Téléchargement (Gist)…", "syncing");
+  try {
+    const r = await fetch("https://api.github.com/gists/" + cfg.gistId, {
+      headers: { "Authorization": "Bearer " + cfg.pat, "Accept": "application/vnd.github+json" }
+    });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    const f = j.files && j.files[SYNC_FILENAME];
+    if(!f){ throw new Error("Fichier de données introuvable dans le Gist."); }
+    let content = f.content;
+    if(f.truncated && f.raw_url){
+      const rr = await fetch(f.raw_url);
+      content = await rr.text();
+    }
+    const data = JSON.parse(content);
+    applyCloudPayload(data);
+    localStorage.setItem(SYNC_LAST_KEY, new Date().toISOString());
+    refreshSyncBadge();
+    if(!silent) setSyncStatus("✅ Synchronisation OK (téléchargement).", "ok");
+    return true;
+  } catch(err){
+    console.error("pullFromCloudGist", err);
+    setSyncStatus("⚠️ Pull cloud : " + err.message, "err");
+    return false;
+  }
+}
+
 async function pushToCloud(){
   const cfg = loadSyncCfg();
   if(!cfg.pat) { setSyncStatus("⚠️ PAT non configuré.", "err"); return false; }
+  // Support legacy Gist mode if gistId is set
+  if(cfg.gistId) return pushToCloudGist();
   setSyncStatus("⏳ Envoi vers le cloud…", "syncing");
+  if(typeof wipStart === "function") wipStart("☁️ Sync cloud (push)…");
+  try {
+    await ensureSyncBranch(cfg.pat);
+    const payload = buildCloudPayload();
+    const contentB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    // Get current SHA if we don't have it
+    if(!__syncFileSha){
+      const chk = await fetch(SYNC_REPO_API + "?ref=" + SYNC_BRANCH, {
+        headers: { "Authorization": "Bearer " + cfg.pat, "Accept": "application/vnd.github+json" }
+      });
+      if(chk.ok){ const d = await chk.json(); __syncFileSha = d.sha; }
+    }
+    const body = {
+      message: "Sync — " + new Date().toISOString(),
+      content: contentB64,
+      branch: SYNC_BRANCH
+    };
+    if(__syncFileSha) body.sha = __syncFileSha;
+    const resp = await fetch(SYNC_REPO_API, {
+      method: "PUT",
+      headers: { "Authorization": "Bearer " + cfg.pat, "Content-Type": "application/json", "Accept": "application/vnd.github+json" },
+      body: JSON.stringify(body)
+    });
+    if(!resp.ok){
+      const t = await resp.text();
+      throw new Error("HTTP " + resp.status + " — " + t.slice(0, 200));
+    }
+    const j = await resp.json();
+    __syncFileSha = j.content.sha;
+    localStorage.setItem(SYNC_LAST_KEY, new Date().toISOString());
+    refreshSyncBadge();
+    setSyncStatus("✅ Synchronisation OK.", "ok");
+    return true;
+  } catch(err){
+    console.error("pushToCloud", err);
+    setSyncStatus("⚠️ Push cloud : " + err.message, "err");
+    return false;
+  } finally {
+    if(typeof wipEnd === "function") wipEnd();
+  }
+}
+
+async function pushToCloudGist(){
+  const cfg = loadSyncCfg();
+  if(!cfg.pat) { setSyncStatus("⚠️ PAT non configuré.", "err"); return false; }
+  setSyncStatus("⏳ Envoi vers le cloud (Gist)…", "syncing");
   if(typeof wipStart === "function") wipStart("☁️ Sync cloud (push)…");
   try {
     const payload = buildCloudPayload();
@@ -12918,14 +13019,12 @@ async function pushToCloud(){
     };
     let resp;
     if(cfg.gistId){
-      // Update existing
       resp = await fetch("https://api.github.com/gists/" + cfg.gistId, {
         method: "PATCH",
         headers: { "Authorization": "Bearer " + cfg.pat, "Content-Type": "application/json", "Accept": "application/vnd.github+json" },
         body: JSON.stringify(body)
       });
     } else {
-      // Create new private gist
       resp = await fetch("https://api.github.com/gists", {
         method: "POST",
         headers: { "Authorization": "Bearer " + cfg.pat, "Content-Type": "application/json", "Accept": "application/vnd.github+json" },
@@ -12947,7 +13046,7 @@ async function pushToCloud(){
     setSyncStatus("✅ Synchronisation OK.", "ok");
     return true;
   } catch(err){
-    console.error("pushToCloud", err);
+    console.error("pushToCloudGist", err);
     setSyncStatus("⚠️ Push cloud : " + err.message, "err");
     return false;
   } finally {
