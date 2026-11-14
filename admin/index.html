@@ -13245,7 +13245,7 @@ async function applyInviteFromHash(){
   try {
     const txt = b64decodeUtf8(decodeURIComponent(payload));
     const data = JSON.parse(txt);
-    if(!data.pat || !data.gistId) throw new Error("Lien d'invitation incomplet");
+    if(!data.pat) throw new Error("Lien d'invitation incomplet");
     // On affiche un message d'attente plein écran
     const ov = $("authOverlay");
     ov.style.display = "flex";
