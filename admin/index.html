@@ -15197,6 +15197,45 @@ function openContractPreview(blob, fileName, data, mode){
       });
     });
   }
+  // === Bouton SMS : envoie le lien de signature par SMS via l'app SMS Gateway ===
+  const smsBtn = document.getElementById("cp_sendSmsBtn_inline");
+  if(smsBtn){
+    smsBtn.addEventListener("click", () => {
+      if(!currentContractBlob || !currentContractData){ alert("⚠️ Aucun contrat à envoyer (génère-le d'abord)."); return; }
+      const d = currentContractData;
+      const tel = getClientPhoneForWa();
+      const isDevis = (currentContractFileName || "").toLowerCase().startsWith("devis");
+      const greeting = (typeof buildGreeting === "function") ? buildGreeting(d.nom) : "Bonjour";
+      // Génère le lien de signature pour l'inclure dans le SMS
+      const pack = {
+        nom: d.nom, adresse: d.adresse, cni: d.cni, telephone: d.telephone, email: d.email,
+        dateDebut: d.date_debut, dateFin: d.date_fin,
+        heureDebut: d.heure_debut, heureFin: d.heure_fin,
+        personnesJour: d.personnes_jour, personnesNuit: d.personnes_nuit,
+        total: d.total, acomptes: d.acomptes, solde: d.solde,
+        dateSignature: d.date_signature,
+        hasEvent: d.has_event, dateEvenement: d.date_evenement,
+        personnesEvenement: d.personnes_evenement,
+        heureEvenementDebut: d.heure_evenement_debut, heureEvenementFin: d.heure_evenement_fin,
+        extras: d.extras, totalExtras: d.total_extras,
+        swiklyLink: d.swikly_link,
+        societe: d.societe, societeForme: d.societeForme, societeSiret: d.societeSiret,
+        societeAdresse: d.societeAdresse, societeTva: d.societeTva,
+        montantMode: d.montant_mode, bailleur: d.bailleur, rib: d.rib
+      };
+      const signUrl = location.origin + location.pathname + "#sign=" + b64encodeUtf8(JSON.stringify(pack));
+      const smsBody = isDevis
+        ? greeting + ", voici le devis Villa Mandalika du " + (d.date_debut || "") + (d.date_fin && d.date_fin !== d.date_debut ? " au " + d.date_fin : "") + ". Consultez-le ici : " + signUrl
+        : greeting + ", voici votre contrat Villa Mandalika du " + (d.date_debut || "") + (d.date_fin && d.date_fin !== d.date_debut ? " au " + d.date_fin : "") + ". Signez-le ici : " + signUrl;
+      showInlineMailPreview({
+        mode: "sms",
+        title: "📱 Aperçu du SMS",
+        to: tel ? "0" + tel.slice(2) : "",
+        body: smsBody,
+        attachInfo: "Le SMS inclut le lien de signature en ligne (pas de PJ possible par SMS)"
+      });
+    });
+  }
   const cs = document.getElementById("cp_countersignBtn_inline");
   if(cs){
     cs.addEventListener("click", () => {
