@@ -13205,10 +13205,10 @@ $("syncImportBtn").addEventListener("click", () => {
   if(s.startsWith("STEVS1:")) s = s.slice(7);
   try {
     const data = JSON.parse(b64decodeUtf8(s));
-    if(!data.pat || !data.gistId) throw new Error("Code incomplet");
+    if(!data.pat) throw new Error("Code incomplet");
     if(!confirm("Rejoindre cette équipe ?\n\nCela va remplacer tes données locales par celles de l'équipe (calendrier, contrats, utilisateurs).")) return;
     localStorage.setItem(SYNC_PAT_KEY, data.pat);
-    localStorage.setItem(SYNC_GIST_KEY, data.gistId);
+    if(data.gistId) localStorage.setItem(SYNC_GIST_KEY, data.gistId);
     localStorage.setItem(SYNC_AUTO_KEY, "1");
     applySyncCfgUI();
     pullFromCloud().then(ok => {
@@ -13264,7 +13264,7 @@ async function applyInviteFromHash(){
     ov.appendChild(card);
     // Applique la config sync
     localStorage.setItem(SYNC_PAT_KEY, data.pat);
-    localStorage.setItem(SYNC_GIST_KEY, data.gistId);
+    if(data.gistId) localStorage.setItem(SYNC_GIST_KEY, data.gistId);
     localStorage.setItem(SYNC_AUTO_KEY, "1");
     applySyncCfgUI();
     // Pull cloud → ramène les utilisateurs. TIMEOUT 12s pour ne JAMAIS rester bloqué
