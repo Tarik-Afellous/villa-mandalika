@@ -12705,7 +12705,7 @@ function loadSyncCfg(){
 }
 function isSyncConfigured(){
   const cfg = loadSyncCfg();
-  return !!(cfg.pat && cfg.gistId);
+  return !!cfg.pat; // PAT seul suffit : mode Repo (scope repo) ou Gist (scope gist)
 }
 function applySyncCfgUI(){
   const cfg = loadSyncCfg();
