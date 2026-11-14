@@ -15040,6 +15040,17 @@ function openContractPreview(blob, fileName, data, mode){
           }
         }
         await doSend();
+      } else if(__inlineMailMode === "sms"){
+        let cleanTel = (to || "").replace(/\D/g, "");
+        if(cleanTel && /^0\d{9}$/.test(cleanTel)) cleanTel = "33" + cleanTel.slice(1);
+        const smsNum = cleanTel ? (cleanTel.startsWith("33") ? "+"+cleanTel : cleanTel) : "";
+        try { await navigator.clipboard.writeText(body); } catch(_){}
+        if(smsNum){
+          window.open("sms:" + smsNum + "?body=" + encodeURIComponent(body), "_self");
+        } else {
+          alert("📋 Message copié dans le presse-papier.\n\nColle-le (⌘V) dans ton application SMS.");
+        }
+        hideInlineMailPreview();
       } else if(__inlineMailMode === "whatsapp"){
         let cleanTel = (to || "").replace(/\D/g, "");
         if(cleanTel && /^0\d{9}$/.test(cleanTel)) cleanTel = "33" + cleanTel.slice(1);
