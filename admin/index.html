@@ -12540,10 +12540,12 @@ async function resetUserPassword(userId){
 // Le lien contient PAT + Gist ID + login (l'identifiant sera pré-rempli sur l'écran de login cible).
 async function generateUserInviteLink(username){
   const cfg = loadSyncCfg();
-  if(!cfg.pat || !cfg.gistId){ toast("Configure d'abord la sync (PAT + Gist).", "err"); return; }
+  if(!cfg.pat){ toast("Configure d'abord la sync (PAT).", "err"); return; }
   const me = currentUser();
   if(me && me.role !== "admin"){ toast("Seul l'admin peut partager l'accès.", "err"); return; }
-  const payload = b64encodeUtf8(JSON.stringify({ pat: cfg.pat, gistId: cfg.gistId }));
+  const inviteData = { pat: cfg.pat };
+  if(cfg.gistId) inviteData.gistId = cfg.gistId;
+  const payload = b64encodeUtf8(JSON.stringify(inviteData));
   const baseUrl = (getPublicBaseURL() || location.href.split("#")[0]).split("?")[0];
   const inviteUrl = baseUrl + "?invite=" + encodeURIComponent(payload) + "&login=" + encodeURIComponent(username);
   $("syncShareLinkText").value = inviteUrl;
