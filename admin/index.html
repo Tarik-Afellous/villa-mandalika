@@ -13165,10 +13165,12 @@ $("syncNowBtn").addEventListener("click", async () => {
 
 $("syncShareBtn").addEventListener("click", async () => {
   const cfg = loadSyncCfg();
-  if(!cfg.pat || !cfg.gistId){ toast("Configure d'abord la sync (PAT + Gist).", "err"); return; }
+  if(!cfg.pat){ toast("Configure d'abord la sync (PAT).", "err"); return; }
   const me = currentUser();
   if(me && me.role !== "admin"){ toast("Seul l'admin peut partager l'accès.", "err"); return; }
-  const payload = b64encodeUtf8(JSON.stringify({ pat: cfg.pat, gistId: cfg.gistId }));
+  const inviteData = { pat: cfg.pat };
+  if(cfg.gistId) inviteData.gistId = cfg.gistId;
+  const payload = b64encodeUtf8(JSON.stringify(inviteData));
   // Construit un lien d'invitation magique : la cible ouvre l'URL → l'app détecte
   // ?invite=… → applique automatiquement la config sync + pull cloud + login.
   // On utilise ?invite (query param) plutôt que #invite (hash) car WhatsApp/Messenger
