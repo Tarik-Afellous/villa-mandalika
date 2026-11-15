@@ -4245,6 +4245,13 @@ $("genBtn").addEventListener("click", () => {
                 if(Array.isArray(data.acomptes)) _bkRef.acomptes = data.acomptes.map(a => ({ label:a.label, montant:a.montant, dueDate:a.dueDate||"", paid:!!a.paid }));
                 if(data.total) _bkRef.total = data.total;
                 if(data.solde) _bkRef.solde = data.solde;
+                if(data.adresse) _bkRef.adresse = data.adresse;
+                if(data.cni) _bkRef.cni = data.cni;
+                if(data.societe) _bkRef.societe = data.societe;
+                if(data.personnes_jour) _bkRef.personnesJour = data.personnes_jour;
+                if(data.personnes_nuit) _bkRef.personnesNuit = data.personnes_nuit;
+                _bkRef.email = data.email || _bkRef.email || "";
+                _bkRef.telephone = data.telephone || _bkRef.telephone || "";
                 if(typeof saveBookings === "function") saveBookings();
                 if(typeof renderCalendar === "function") renderCalendar();
                 if(typeof renderBookings === "function") renderBookings();
