@@ -1034,7 +1034,7 @@
         <span style="font-size:11px;color:var(--muted)">
           <span class="cal-legend airbnb"></span> Airbnb &nbsp;
           <span class="cal-legend manual"></span> Direct &nbsp;
-          <span class="cal-legend pending"></span> Devis envoyé &nbsp;
+          <span class="cal-legend pending"></span> 📩 Devis envoyé (à relancer) &nbsp;
           <span class="cal-legend contrat-recu"></span> Contrat reçu &nbsp;
           <span class="cal-legend valide"></span> Validé &nbsp;
           <span class="cal-legend visite"></span> Visite &nbsp;
@@ -7212,7 +7212,7 @@ function renderCalendar(){
         if(_evStat === "devis_envoye") txt += "📩 ";
         txt += titleBase;
         txt = txt.slice(0, 45);
-        const tooltip = (ev.source ? (ev.source.toUpperCase() + " · ") : "") + (ev.heureDebut ? (ev.heureDebut + (ev.heureFin ? "-" + ev.heureFin : "") + " · ") : "") + (ev.title || "");
+        const tooltip = (_evStat === "devis_envoye" ? "📩 Devis envoyé — à relancer · " : "") + (ev.source ? (ev.source.toUpperCase() + " · ") : "") + (ev.heureDebut ? (ev.heureDebut + (ev.heureFin ? "-" + ev.heureFin : "") + " · ") : "") + (ev.title || "");
         html += '<div class="' + evCls + halfCls + '" data-id="' + ev.id + '" title="' + tooltip.replace(/"/g,"&quot;") + '">' + txt + '</div>';
       });
       if(evts.length > MAX_VISIBLE) html += '<div class="cal-more">+' + (evts.length - MAX_VISIBLE) + ' autre' + (evts.length-MAX_VISIBLE>1?"s":"") + '</div>';
