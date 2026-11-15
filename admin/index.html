@@ -7845,7 +7845,8 @@ const ICAL_SOURCES = [
   { key: "stevents_airbnb_ical",   label: "Airbnb",  source: "airbnb",  cleanRegex: /(Not\s*available|Closed[^)]*)/i, skipGeneric: false },
   { key: "stevents_booking_ical",  label: "Booking", source: "booking", cleanRegex: /(CLOSED|Booked|Reserved|Not\s*available)/i, skipGeneric: true },
   { key: "stevents_agoda_ical",    label: "Agoda",   source: "agoda",   cleanRegex: /(CLOSED|Booked|Reserved|Not\s*available)/i, skipGeneric: true },
-  { key: "stevents_abritel_ical",  label: "Abritel", source: "abritel", cleanRegex: /(Blocked|Reserved|Booked|Not\s*available)/i, skipGeneric: true }
+  { key: "stevents_abritel_ical",  label: "Abritel", source: "abritel", cleanRegex: /(Blocked|Reserved|Booked|Not\s*available)/i, skipGeneric: true },
+  { key: "stevents_greengo_ical",  label: "GreenGo", source: "greengo", cleanRegex: /(Blocked|Reserved|Booked|Not\s*available)/i, skipGeneric: true }
 ];
 // Regex qui détecte un événement "générique" (juste un blocage sans détails client)
 const GENERIC_BLOCK_RE = /^(?:not\s*available|closed[^)a-z]*|blocked|reserved|booked|airbnb|booking|external\s*calendar|sync)?\s*$/i;
@@ -7974,7 +7975,8 @@ async function silentIcalSync(){
   const fields = [
     { id: "icalBookingUrl", key: "stevents_booking_ical", label: "Booking" },
     { id: "icalAgodaUrl",   key: "stevents_agoda_ical",   label: "Agoda" },
-    { id: "icalAbritelUrl", key: "stevents_abritel_ical", label: "Abritel" }
+    { id: "icalAbritelUrl", key: "stevents_abritel_ical", label: "Abritel" },
+    { id: "icalGreengoUrl", key: "stevents_greengo_ical", label: "GreenGo" }
   ];
   // Pré-remplit les champs avec les valeurs stockées
   fields.forEach(f => {
@@ -8103,7 +8105,7 @@ function generateIcal(){
     "X-WR-CALNAME:Villa Mandalika - Réservations confirmées",
     "X-WR-TIMEZONE:Europe/Paris"
   ];
-  const platformSources = ["airbnb", "booking", "agoda", "abritel"];
+  const platformSources = ["airbnb", "booking", "agoda", "abritel", "greengo"];
   bookings.filter(b => {
     if(!b || !b.dateDebut) return false;
     // Exclus résas de plateformes (anti-boucle)
