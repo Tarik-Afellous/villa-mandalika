@@ -7041,6 +7041,13 @@ async function ensureBookingFromContract(){
   }
   if(data.total) b.total = data.total;
   if(data.solde) b.solde = data.solde;
+  if(data.adresse) b.adresse = data.adresse;
+  if(data.cni) b.cni = data.cni;
+  if(data.societe) b.societe = data.societe;
+  if(data.personnes_jour) b.personnesJour = data.personnes_jour;
+  if(data.personnes_nuit) b.personnesNuit = data.personnes_nuit;
+  b.email = data.email || b.email || "";
+  b.telephone = data.telephone || b.telephone || "";
   if(typeof saveBookings === "function") saveBookings();
   if(typeof renderBookings === "function") renderBookings();
   if(typeof renderCalendar === "function") renderCalendar();
