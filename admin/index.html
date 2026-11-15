@@ -7204,12 +7204,14 @@ function renderCalendar(){
         } else if(isLastDay && ev.heureFin){
           timeLabel = "↙ " + ev.heureFin.replace(":","h");
         }
-        // Compose : [source] · [heure] [nom]
+        // Compose : [source] · [heure] [📩 si devis envoyé] [nom]
+        const _evStat = (ev.type === "reservation" || !ev.type) ? bookingStatus(ev) : null;
         let txt = "";
         if(srcTag) txt += srcTag + " ";
         if(timeLabel) txt += timeLabel + " ";
+        if(_evStat === "devis_envoye") txt += "📩 ";
         txt += titleBase;
-        txt = txt.slice(0, 40);
+        txt = txt.slice(0, 45);
         const tooltip = (ev.source ? (ev.source.toUpperCase() + " · ") : "") + (ev.heureDebut ? (ev.heureDebut + (ev.heureFin ? "-" + ev.heureFin : "") + " · ") : "") + (ev.title || "");
         html += '<div class="' + evCls + halfCls + '" data-id="' + ev.id + '" title="' + tooltip.replace(/"/g,"&quot;") + '">' + txt + '</div>';
       });
