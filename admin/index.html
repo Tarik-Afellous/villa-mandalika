@@ -4157,6 +4157,25 @@ $("genBtn").addEventListener("click", () => {
         currentContractBlob = blob;
         currentContractFileName = fileName;
         currentContractData = data;
+        // Auto-enregistrement des données client sur la réservation liée
+        if(linkedBookingId){
+          const _bk = bookings.find(x => x.id === linkedBookingId);
+          if(_bk){
+            _bk.title = _bk.title || data.nom;
+            _bk.email = data.email || _bk.email || "";
+            _bk.telephone = data.telephone || _bk.telephone || "";
+            if(data.adresse) _bk.adresse = data.adresse;
+            if(data.cni) _bk.cni = data.cni;
+            if(data.societe) _bk.societe = data.societe;
+            if(data.personnes_jour) _bk.personnesJour = data.personnes_jour;
+            if(data.personnes_nuit) _bk.personnesNuit = data.personnes_nuit;
+            if(data.total) _bk.total = data.total;
+            if(data.solde) _bk.solde = data.solde;
+            _bk.formSnapshot = data._formSnapshot || _bk.formSnapshot || null;
+            if(Array.isArray(data.acomptes)) _bk.acomptes = data.acomptes.map(a => ({ label:a.label, montant:a.montant, dueDate:a.dueDate||"", paid:!!a.paid }));
+            if(typeof saveBookings === "function") saveBookings();
+          }
+        }
         openContractPreview(blob, fileName, data, "inline");
       } catch(err){
         console.error("Erreur openContractPreview:", err);
