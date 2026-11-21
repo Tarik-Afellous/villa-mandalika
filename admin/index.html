@@ -7749,6 +7749,10 @@ $("bk_saveBtn").addEventListener("click", () => {
   b.heureFin = $("bk_heureFin").value;
   b.email = $("bk_email").value.trim();
   b.telephone = $("bk_telephone").value.trim();
+  b.nbPersonnes = parseInt($("bk_nbPersonnes").value) || null;
+  b.eventNature = $("bk_eventNature").value || null;
+  b.montantTotal = parseFloat($("bk_montantTotal").value) || null;
+  b.source = $("bk_source").value || "manual";
   b.notes = $("bk_notes").value;
   b.paiements = Array.from($("bk_paiements").querySelectorAll(".pay-row")).map(r => {
     const inputs = r.querySelectorAll("input,select");
