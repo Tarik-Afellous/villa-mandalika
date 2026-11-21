@@ -16081,12 +16081,36 @@ $("sendPreviewSendBtn").addEventListener("click", () => {
 
 // === Helper générique d'envoi d'un mail (Gmail OAuth) avec pièce jointe optionnelle ===
 async function sendCustomMail({ to, subject, body, signUrl, attachmentBlob, attachmentName }){
+  // Fallback : si signUrl absent mais contrat disponible → génère le lien de signature
+  if(!signUrl && typeof currentContractData === "object" && currentContractData){
+    try {
+      const d = currentContractData;
+      const pack = {
+        nom: d.nom, adresse: d.adresse, cni: d.cni, telephone: d.telephone, email: d.email,
+        dateDebut: d.date_debut, dateFin: d.date_fin,
+        heureDebut: d.heure_debut, heureFin: d.heure_fin,
+        personnesJour: d.personnes_jour, personnesNuit: d.personnes_nuit,
+        total: d.total, acomptes: d.acomptes, solde: d.solde,
+        dateSignature: d.date_signature,
+        hasEvent: d.has_event, dateEvenement: d.date_evenement,
+        personnesEvenement: d.personnes_evenement,
+        heureEvenementDebut: d.heure_evenement_debut, heureEvenementFin: d.heure_evenement_fin,
+        extras: d.extras, totalExtras: d.total_extras,
+        swiklyLink: d.swikly_link,
+        societe: d.societe, societeForme: d.societeForme, societeSiret: d.societeSiret,
+        societeAdresse: d.societeAdresse, societeTva: d.societeTva,
+        montantMode: d.montant_mode, bailleur: d.bailleur, rib: d.rib
+      };
+      signUrl = location.origin + location.pathname + "#sign=" + b64encodeUtf8(JSON.stringify(pack));
+    } catch(e){ console.warn("signUrl fallback failed:", e); }
+  }
+  const emailFrom = "Villa Mandalika <contact@villa-mandalika.fr>";
   // ===== MODE BACKEND : envoi via le Worker (refresh token permanent) =====
   if(gmailBackend()){
     if(typeof wipStart === "function") wipStart("📧 Envoi email à " + to + "…");
     try {
       const bodyHtml = buildEmailBodyHtml(body, signUrl);
-      const opts = { to, subject, bodyHtml };
+      const opts = { from: emailFrom, to, subject, bodyHtml };
       if(attachmentBlob && attachmentName){
         opts.attachmentBase64 = await blobToBase64Plain(attachmentBlob);
         opts.attachmentName = attachmentName;
