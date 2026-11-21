@@ -15311,7 +15311,8 @@ function openContractPreview(blob, fileName, data, mode){
         to: rawEmail,
         subject: subject,
         body: body,
-        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat.pdf") + "  +  ✍️ Lien de signature inclus dans le message  ·  ✨ Signature ST EVENTS ajoutée automatiquement"
+        signUrl: signUrl,
+        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat.pdf") + "  +  ✍️ Bouton de signature en ligne inclus  ·  ✨ Signature ST EVENTS ajoutée automatiquement"
       });
     });
   }
