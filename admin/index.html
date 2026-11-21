@@ -7597,7 +7597,7 @@ function openBookingModal(id){
   $("bk_heureFin").value = b.heureFin || "";
   $("bk_email").value = b.email || "";
   $("bk_telephone").value = b.telephone || "";
-  $("bk_nbPersonnes").value = b.nbPersonnes || "";
+  $("bk_nbPersonnes").value = b.nbPersonnes || b.personnesJour || "";
   $("bk_eventNature").value = b.eventNature || "";
   $("bk_montantTotal").value = b.montantTotal || "";
   $("bk_source").value = b.source || "manual";
