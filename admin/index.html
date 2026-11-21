@@ -7606,7 +7606,8 @@ function openBookingModal(id){
   const _bkStat = (b.type === "reservation" || !b.type) ? bookingStatus(b) : null;
   const badgeEl = $("bk_statusBadge");
   if(_bkStat && id){
-    const _statLabels = { nouveau:"⏳ Nouveau — pas de contrat", devis_envoye:"📩 Devis envoyé — en attente retour client", contrat_recu:"✍️ Contrat signé reçu — à contresigner", valide:"✅ Validé — contrat OK ou acompte payé" };
+    const _hasSentContract = (b.contracts || []).some(c => c && c.sentByMail);
+    const _statLabels = { nouveau:"⏳ Nouveau — pas de contrat", devis_envoye: _hasSentContract ? "📩 Devis envoyé — en attente retour client" : "📄 Contrat généré — pas encore envoyé", contrat_recu:"✍️ Contrat signé reçu — à contresigner", valide:"✅ Validé — contrat OK ou acompte payé" };
     const _statColors = { nouveau:"rgba(161,161,170,0.15);color:#a1a1aa;border:1px solid rgba(161,161,170,0.3)", devis_envoye:"rgba(167,139,250,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3)", contrat_recu:"rgba(34,211,238,0.15);color:#67e8f9;border:1px solid rgba(34,211,238,0.3)", valide:"rgba(34,197,94,0.15);color:#86efac;border:1px solid rgba(34,197,94,0.3)" };
     badgeEl.textContent = _statLabels[_bkStat] || _bkStat;
     badgeEl.style.cssText = "display:block;margin-bottom:10px;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;text-align:center;background:" + (_statColors[_bkStat] || "transparent");
