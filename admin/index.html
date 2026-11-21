@@ -6733,6 +6733,9 @@ function switchTab(tabId){
     activeSet = new Set(groups[st] || [st]);
   } else if(mainTab === "t-documents"){
     activeSet = new Set(DOC_IDS);
+    const hist = document.querySelector('[data-tab="t-history"]');
+    const pref = document.querySelector('[data-tab="t-prefill"]');
+    if(hist && pref) pref.parentNode.insertBefore(hist, pref);
   } else if(mainTab === "t-finances"){
     activeSet = new Set(["t-accounting"]);
   } else {
