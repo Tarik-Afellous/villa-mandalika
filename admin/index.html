@@ -16108,7 +16108,7 @@ async function sendCustomMail({ to, subject, body, signUrl, attachmentBlob, atta
   }
   if(typeof wipStart === "function") wipStart("📧 Envoi email à " + to + "…");
   try {
-    const bodyHtml = buildEmailBodyHtml(body);
+    const bodyHtml = buildEmailBodyHtml(body, signUrl);
     const payload = { from: cfg.account || "me", to, subject, bodyHtml };
     if(attachmentBlob && attachmentName){
       payload.attachmentBase64 = await blobToBase64Plain(attachmentBlob);
