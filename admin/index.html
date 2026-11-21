@@ -6061,7 +6061,7 @@ function buildContratPdfDef(d){
   c.push("La RC Pro Villa Mandalika pourra couvrir toute problématique à hauteur de sa couverture contractuelle.");
 
   // ========== SIGNATURES ==========
-  c.push({ text: ' ', margin: [0, 12, 0, 0], pageBreak: 'before' });
+  c.push({ text: ' ', margin: [0, 24, 0, 0] });
   c.push({ text: 'SIGNATURES', color: GOLD, fontSize: 9, bold: true, characterSpacing: 3, alignment: 'center', margin: [0, 0, 0, 4] });
   c.push({ canvas: [ { type:'line', x1:0, y1:0, x2:485, y2:0, lineWidth:0.6, lineColor: GOLD } ], margin: [0, 0, 0, 16] });
   c.push({ text: `Fait à Paris, le ${d.date_signature}`, color: NAVY, italics: true, alignment: 'center', margin: [0, 0, 0, 36] });
