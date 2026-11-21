@@ -1687,8 +1687,30 @@
         <input type="text" id="cni" placeholder="Ex : 123456789012">
       </div>
     </div>
-    <div style="margin-top:8px">
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
       <button type="button" class="ghost" id="addSocBtn" style="padding:6px 12px;font-size:12px">+ Cette location est pour une société</button>
+      <button type="button" class="ghost" id="addRepBtn" style="padding:6px 12px;font-size:12px">+ Représenté par (conciergerie)</button>
+    </div>
+    <div id="repWrap" class="hide" style="margin-top:10px">
+      <p class="hint" style="font-size:11px;margin:0 0 8px">Le contrat indiquera que le Preneur est représenté par cette conciergerie. L'e-mail et le téléphone de la conciergerie seront utilisés comme coordonnées de contact.</p>
+      <div class="grid">
+        <div style="grid-column:1/-1">
+          <label>Nom de la conciergerie</label>
+          <input type="text" id="repNom" placeholder="Ex : Conciergerie du Grand Paris">
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Adresse</label>
+          <input type="text" id="repAdresse" placeholder="Ex : 15 avenue Victor Hugo, 75016 Paris">
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" id="repEmail" placeholder="contact@conciergerie.fr">
+        </div>
+        <div>
+          <label>Téléphone</label>
+          <input type="tel" id="repTelephone" placeholder="01 23 45 67 89">
+        </div>
+      </div>
     </div>
     <div id="socWrap" class="hide" style="margin-top:10px">
       <p class="hint" style="font-size:11px;margin:0 0 8px">Le contrat affichera la société comme Preneur, et la personne saisie ci-dessus comme représentante légale.</p>
