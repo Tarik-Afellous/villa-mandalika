@@ -6061,17 +6061,17 @@ function buildContratPdfDef(d){
   c.push("La RC Pro Villa Mandalika pourra couvrir toute problématique à hauteur de sa couverture contractuelle.");
 
   // ========== SIGNATURES ==========
-  c.push({ text: ' ', margin: [0, 24, 0, 0] });
+  c.push({ text: ' ', margin: [0, 16, 0, 0] });
   c.push({ text: 'SIGNATURES', color: GOLD, fontSize: 9, bold: true, characterSpacing: 3, alignment: 'center', margin: [0, 0, 0, 4] });
-  c.push({ canvas: [ { type:'line', x1:0, y1:0, x2:485, y2:0, lineWidth:0.6, lineColor: GOLD } ], margin: [0, 0, 0, 16] });
-  c.push({ text: `Fait à Paris, le ${d.date_signature}`, color: NAVY, italics: true, alignment: 'center', margin: [0, 0, 0, 36] });
+  c.push({ canvas: [ { type:'line', x1:0, y1:0, x2:485, y2:0, lineWidth:0.6, lineColor: GOLD } ], margin: [0, 0, 0, 10] });
+  c.push({ text: `Fait à Paris, le ${d.date_signature}`, color: NAVY, italics: true, alignment: 'center', margin: [0, 0, 0, 20] });
   c.push({
     columns: [
       { stack: [
           { text: 'POUR VILLA MANDALIKA', color: GOLD, fontSize: 8, bold: true, characterSpacing: 2, alignment: 'center' },
           { text: 'Le Bailleur', color: SOFT, fontSize: 9, italics: true, alignment: 'center', margin: [0, 2, 0, 0] },
-          { canvas: [ { type:'rect', x:0, y:60, w:200, h:0.5, color: NAVY } ], margin: [0, 6, 0, 0], alignment: 'center' },
-          { text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 70, 0, 0] }
+          { canvas: [ { type:'rect', x:0, y:40, w:200, h:0.5, color: NAVY } ], margin: [0, 4, 0, 0], alignment: 'center' },
+          { text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 48, 0, 0] }
         ], width: '*', alignment: 'center'
       },
       { stack: (function(){
@@ -6084,8 +6084,8 @@ function buildContratPdfDef(d){
             s.push({ image: window.__clientSignatureData, width: 180, alignment: 'center', margin: [0, 0, 0, 4] });
             s.push({ text: 'Signé électroniquement le ' + (window.__clientSignatureDate ? new Date(window.__clientSignatureDate).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'), color: SOFT, fontSize: 7, alignment: 'center', italics: true });
           } else {
-            s.push({ canvas: [ { type:'rect', x:0, y:60, w:200, h:0.5, color: NAVY } ], margin: [0, 6, 0, 0], alignment: 'center' });
-            s.push({ text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 70, 0, 0] });
+            s.push({ canvas: [ { type:'rect', x:0, y:40, w:200, h:0.5, color: NAVY } ], margin: [0, 4, 0, 0], alignment: 'center' });
+            s.push({ text: 'Signature précédée de « Lu et approuvé »', color: SOFT, fontSize: 7, alignment: 'center', italics: true, margin: [0, 48, 0, 0] });
           }
           return s;
         })(), width: '*', alignment: 'center'
