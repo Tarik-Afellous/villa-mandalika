@@ -5866,8 +5866,15 @@ function buildContratPdfDef(d){
     c.push(field('Adresse', d.adresse));
     c.push(field('CNI / Passeport n°', d.cni));
   }
-  c.push(field('Téléphone', d.telephone));
-  c.push(field('Email', d.email));
+  if(d.representePar && d.representePar.nom){
+    c.push(field('Représenté par', d.representePar.nom));
+    if(d.representePar.adresse) c.push(field('Adresse représentant', d.representePar.adresse));
+    c.push(field('Téléphone', d.representePar.telephone || d.telephone));
+    c.push(field('Email', d.representePar.email || d.email));
+  } else {
+    c.push(field('Téléphone', d.telephone));
+    c.push(field('Email', d.email));
+  }
 
   c.push({ text: ' ', margin: [0, 8, 0, 0] });
 
