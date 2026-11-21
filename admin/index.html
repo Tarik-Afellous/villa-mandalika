@@ -7360,10 +7360,11 @@ const CONTRACT_FORM_IDS = ["nom","cni","societe","societeForme","societeSiret","
 
 function captureContractForm(){
   try{
-    const snap = { v:1, fields:{}, societeOn:false, eventOn:false, extras:[], acomptes:[] };
+    const snap = { v:1, fields:{}, societeOn:false, eventOn:false, repOn:false, extras:[], acomptes:[] };
     CONTRACT_FORM_IDS.forEach(id => { const el = document.getElementById(id); if(el) snap.fields[id] = el.value; });
     const et = document.getElementById("eventToggle"); snap.eventOn = !!(et && et.checked);
     const sw = document.getElementById("socWrap"); snap.societeOn = !!(sw && !sw.classList.contains("hide"));
+    const rw = document.getElementById("repWrap"); snap.repOn = !!(rw && !rw.classList.contains("hide"));
     if(typeof PRESTATIONS !== "undefined" && typeof extrasListEl !== "undefined" && extrasListEl){
       PRESTATIONS.forEach(p => {
         const cb = extrasListEl.querySelector('input[data-id="' + p.id + '"]');
