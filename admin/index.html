@@ -4204,7 +4204,7 @@ $("genBtn").addEventListener("click", () => {
             if(data.adresse) _bk.adresse = data.adresse;
             if(data.cni) _bk.cni = data.cni;
             if(data.societe) _bk.societe = data.societe;
-            if(data.personnes_jour) _bk.personnesJour = data.personnes_jour;
+            if(data.personnes_jour){ _bk.personnesJour = data.personnes_jour; _bk.nbPersonnes = parseInt(data.personnes_jour) || _bk.nbPersonnes; }
             if(data.personnes_nuit) _bk.personnesNuit = data.personnes_nuit;
             if(data.total) _bk.total = data.total;
             if(data.solde) _bk.solde = data.solde;
@@ -4285,7 +4285,7 @@ $("genBtn").addEventListener("click", () => {
                 if(data.adresse) _bkRef.adresse = data.adresse;
                 if(data.cni) _bkRef.cni = data.cni;
                 if(data.societe) _bkRef.societe = data.societe;
-                if(data.personnes_jour) _bkRef.personnesJour = data.personnes_jour;
+                if(data.personnes_jour){ _bkRef.personnesJour = data.personnes_jour; _bkRef.nbPersonnes = parseInt(data.personnes_jour) || _bkRef.nbPersonnes; }
                 if(data.personnes_nuit) _bkRef.personnesNuit = data.personnes_nuit;
                 _bkRef.email = data.email || _bkRef.email || "";
                 _bkRef.telephone = data.telephone || _bkRef.telephone || "";
