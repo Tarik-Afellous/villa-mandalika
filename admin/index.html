@@ -7393,6 +7393,10 @@ function restoreContractForm(snap){
   if(!snap || !snap.fields) return false;
   try{
     setSocieteMode(!!snap.societeOn);
+    if(snap.repOn){
+      const rw = document.getElementById("repWrap"), rb = document.getElementById("addRepBtn");
+      if(rw){ rw.classList.remove("hide"); if(rb) rb.textContent = "− Retirer le représentant"; }
+    }
     Object.keys(snap.fields).forEach(id => { const el = document.getElementById(id); if(el) el.value = snap.fields[id]; });
     const et = document.getElementById("eventToggle");
     if(et){ et.checked = !!snap.eventOn; et.dispatchEvent(new Event("change")); }
