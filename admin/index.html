@@ -15979,9 +15979,18 @@ function textToHtmlSafe(text){
 }
 
 // Body HTML complet = texte du user en HTML + signature stylée
-function buildEmailBodyHtml(bodyText){
+function buildEmailBodyHtml(bodyText, signUrl){
+  let signBlock = '';
+  if(signUrl){
+    signBlock = '<div style="text-align:center;margin:24px 0 20px">' +
+      '<a href="' + signUrl.replace(/"/g, '&quot;') + '" style="display:inline-block;padding:14px 32px;background:#1a2744;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;letter-spacing:0.5px">' +
+      '&#128196; Consulter et signer le contrat' +
+      '</a>' +
+    '</div>';
+  }
   return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:13.5px;color:#1a2332;line-height:1.55;max-width:600px">' +
     '<div>' + textToHtmlSafe(bodyText) + '</div>' +
+    signBlock +
     buildEmailSignatureHtml() +
   '</div>';
 }
