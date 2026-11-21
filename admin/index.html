@@ -16134,7 +16134,7 @@ async function sendCustomMail({ to, subject, body, signUrl, attachmentBlob, atta
   if(typeof wipStart === "function") wipStart("📧 Envoi email à " + to + "…");
   try {
     const bodyHtml = buildEmailBodyHtml(body, signUrl);
-    const payload = { from: cfg.account || "me", to, subject, bodyHtml };
+    const payload = { from: emailFrom, to, subject, bodyHtml };
     if(attachmentBlob && attachmentName){
       payload.attachmentBase64 = await blobToBase64Plain(attachmentBlob);
       payload.attachmentName = attachmentName;
@@ -16269,10 +16269,33 @@ async function sendContractViaGmailAPI(){
     $("cp_emailHint").innerHTML = "⏳ Envoi en cours via Gmail…";
     try {
       const pdfB64 = await blobToBase64Plain(currentContractBlob);
-      // Body HTML = texte du user (échappé + sauts de ligne) + signature stylée ST EVENTS auto
-      const bodyHtml = buildEmailBodyHtml(bodyText);
+      // Body HTML = texte du user + bouton signature + signature Villa Mandalika auto
+      let oldSignUrl = null;
+      if(typeof currentContractData === "object" && currentContractData){
+        try {
+          const d = currentContractData;
+          const pack = {
+            nom: d.nom, adresse: d.adresse, cni: d.cni, telephone: d.telephone, email: d.email,
+            dateDebut: d.date_debut, dateFin: d.date_fin,
+            heureDebut: d.heure_debut, heureFin: d.heure_fin,
+            personnesJour: d.personnes_jour, personnesNuit: d.personnes_nuit,
+            total: d.total, acomptes: d.acomptes, solde: d.solde,
+            dateSignature: d.date_signature,
+            hasEvent: d.has_event, dateEvenement: d.date_evenement,
+            personnesEvenement: d.personnes_evenement,
+            heureEvenementDebut: d.heure_evenement_debut, heureEvenementFin: d.heure_evenement_fin,
+            extras: d.extras, totalExtras: d.total_extras,
+            swiklyLink: d.swikly_link,
+            societe: d.societe, societeForme: d.societeForme, societeSiret: d.societeSiret,
+            societeAdresse: d.societeAdresse, societeTva: d.societeTva,
+            montantMode: d.montant_mode, bailleur: d.bailleur, rib: d.rib
+          };
+          oldSignUrl = location.origin + location.pathname + "#sign=" + b64encodeUtf8(JSON.stringify(pack));
+        } catch(e){}
+      }
+      const bodyHtml = buildEmailBodyHtml(bodyText, oldSignUrl);
       const raw = buildGmailMessage({
-        from: cfg.account || "me",
+        from: "Villa Mandalika <contact@villa-mandalika.fr>",
         to: toAddr,
         subject,
         bodyHtml,
