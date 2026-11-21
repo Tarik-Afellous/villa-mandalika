@@ -13526,7 +13526,7 @@ async function applyInviteFromHash(){
   try { invited = await applyInviteFromHash(); }
   catch(e){ console.warn("applyInviteFromHash a échoué :", e); invited = false; }
   // 4. Recharge la liste d'utilisateurs (peut avoir changé après pull cloud)
-  const users = loadUsers();
+  let users = loadUsers();
   if(users.length === 0){
     // Si on était invité mais qu'il n'y a quand même aucun user → message d'erreur
     if(invited){
@@ -13539,11 +13539,19 @@ async function applyInviteFromHash(){
       err.classList.add("show");
       return;
     }
-    // Toujours aucun user et pas d'invitation → page de connexion avec options d'import
-    showAuthOverlay("login");
-    var hint = document.getElementById("loginFirstTimeHint");
-    if(hint) hint.style.display = "block";
-    return;
+    // Aucun user local : tenter un pull cloud automatique (nouvel appareil)
+    if(isSyncConfigured()){
+      try {
+        const pulled = await pullFromCloud(true);
+        if(pulled) users = loadUsers();
+      } catch(e){ console.warn("auto-pull cloud:", e); }
+    }
+    if(users.length === 0){
+      showAuthOverlay("login");
+      var hint = document.getElementById("loginFirstTimeHint");
+      if(hint) hint.style.display = "block";
+      return;
+    }
   }
   // 5. Sinon, si pas connecté → login
   if(!currentUser()){
