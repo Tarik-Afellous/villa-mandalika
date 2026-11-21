@@ -15044,8 +15044,10 @@ function openContractPreview(blob, fileName, data, mode){
   // === Affichage de la zone d'aperçu mail inline (sous les boutons) ===
   // Mode = "gmail" | "whatsapp" | "countersign" — chaque bouton remplit la zone et le bouton Envoyer agit selon le mode.
   let __inlineMailMode = null;
+  let __inlineMailSignUrl = null;
   function showInlineMailPreview(opts){
     const { mode, to, subject, body, title, attachInfo } = opts;
+    __inlineMailSignUrl = opts.signUrl || null;
     __inlineMailMode = mode;
     document.getElementById("inlineMailTitle").textContent = title;
     document.getElementById("inlineMailTo").value = to || "";
