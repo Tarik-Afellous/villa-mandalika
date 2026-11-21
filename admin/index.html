@@ -7585,12 +7585,32 @@ function openBookingModal(id){
   $("bk_heureFin").value = b.heureFin || "";
   $("bk_email").value = b.email || "";
   $("bk_telephone").value = b.telephone || "";
+  $("bk_nbPersonnes").value = b.nbPersonnes || "";
+  $("bk_eventNature").value = b.eventNature || "";
+  $("bk_montantTotal").value = b.montantTotal || "";
+  $("bk_source").value = b.source || "manual";
   $("bk_notes").value = b.notes || "";
+  // Badge de statut
+  const _bkStat = (b.type === "reservation" || !b.type) ? bookingStatus(b) : null;
+  const badgeEl = $("bk_statusBadge");
+  if(_bkStat && id){
+    const _statLabels = { nouveau:"⏳ Nouveau — pas de contrat", devis_envoye:"📩 Devis envoyé — en attente retour client", contrat_recu:"✍️ Contrat signé reçu — à contresigner", valide:"✅ Validé — contrat OK ou acompte payé" };
+    const _statColors = { nouveau:"rgba(161,161,170,0.15);color:#a1a1aa;border:1px solid rgba(161,161,170,0.3)", devis_envoye:"rgba(167,139,250,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3)", contrat_recu:"rgba(34,211,238,0.15);color:#67e8f9;border:1px solid rgba(34,211,238,0.3)", valide:"rgba(34,197,94,0.15);color:#86efac;border:1px solid rgba(34,197,94,0.3)" };
+    badgeEl.textContent = _statLabels[_bkStat] || _bkStat;
+    badgeEl.style.cssText = "display:block;margin-bottom:10px;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;text-align:center;background:" + (_statColors[_bkStat] || "transparent");
+    // Paiement : indicateur sous le badge
+    const _payInfo = (b.paiements || []);
+    const _paidCount = _payInfo.filter(p => p.status === "paid").length;
+    const _paidAmount = _payInfo.filter(p => p.status === "paid").reduce((s,p) => s + (parseFloat(p.amount) || 0), 0);
+    const _totalAmount = _payInfo.reduce((s,p) => s + (parseFloat(p.amount) || 0), 0);
+    if(_payInfo.length > 0){
+      badgeEl.textContent += _paidCount > 0 ? (" · " + _paidCount + "/" + _payInfo.length + " payé" + (_paidCount>1?"s":"") + " (" + _paidAmount.toFixed(0) + " € / " + _totalAmount.toFixed(0) + " €)") : " · Aucun paiement reçu";
+    }
+  } else { badgeEl.style.display = "none"; }
   // Render contrats attachés
   renderContractsList(b);
-  // Afficher la section Paiements uniquement si un contrat est attaché
-  const hasContract = b.contracts && b.contracts.length > 0;
-  $("bk_paiementsSection").style.display = hasContract ? "block" : "none";
+  // Afficher la section Paiements (toujours visible pour les réservations)
+  $("bk_paiementsSection").style.display = (b.type === "reservation" || !b.type) ? "block" : "none";
   // Render paiements
   const payDiv = $("bk_paiements");
   payDiv.innerHTML = "";
