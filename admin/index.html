@@ -12650,7 +12650,7 @@ async function resetUserPassword(userId){
     if(gmailCfg && gmailCfg.token && gmailCfg.token.access_token){
       try {
         const raw = buildGmailMessage({
-          from: gmailCfg.account || "stevents1912@gmail.com",
+          from: "Villa Mandalika <contact@villa-mandalika.fr>",
           to: target.email,
           subject: "Villa Mandalika — Réinitialisation de votre mot de passe",
           bodyText: "Bonjour " + target.name + ",\n\n" +
