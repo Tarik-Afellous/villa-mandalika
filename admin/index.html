@@ -10372,9 +10372,23 @@ async function importStevFromFile(file, statusEl){
     // contrat à un blocage voisin qui se chevauche seulement.
     let b = bookings.find(x => x && x.source && x.source !== "manual" && x.dateDebut === dDeb);
     if(!b) b = bookings.find(x => x && x.source && x.source !== "manual" && !x.manualNamed && x.dateDebut && Math.abs((new Date(x.dateDebut) - new Date(dDeb)) / 86400000) <= 1);
+    // Anti-doublon : cherche aussi parmi les réservations manuelles existantes (même nom + même date)
+    if(!b && nom){
+      const _nomTokens = nom.toUpperCase().split(/[\s_\-]+/).filter(t => t.length >= 3);
+      if(_nomTokens.length > 0){
+        b = bookings.find(x => {
+          if(!x || !x.title || x.dateDebut !== dDeb) return false;
+          const _tUp = x.title.toUpperCase();
+          let _hits = 0;
+          _nomTokens.forEach(t => { if(_tUp.includes(t)) _hits++; });
+          return _hits >= Math.min(_nomTokens.length, 2);
+        });
+      }
+    }
     const meNow = (typeof currentUser === "function") ? currentUser() : null;
     if(b){
-      b.title = nom; b.source = "manual"; b.type = "reservation";
+      if(!b.manualNamed) b.title = nom;
+      b.type = "reservation";
       b.dateDebut = dDeb; b.dateFin = dFin;
       b.heureDebut = depotHeures.d || b.heureDebut || "16:00";
       b.heureFin = depotHeures.f || b.heureFin || "11:00";
