@@ -15162,6 +15162,7 @@ function openContractPreview(blob, fileName, data, mode){
             try { await ensureBookingFromContract(); } catch(e){ console.warn("ensureBookingFromContract failed:", e); }
           }
           hideInlineMailPreview(); // ferme TOUJOURS la zone après tentative d'envoi
+          if(ok && typeof switchTab === "function") switchTab("t-calendar");
         };
         if(typeof isGmailConnected === "function" && !isGmailConnected()){
           if(typeof connectGmail === "function"){
