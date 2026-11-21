@@ -15153,7 +15153,7 @@ function openContractPreview(blob, fileName, data, mode){
         }
         const doSend = async () => {
           if(typeof sendCustomMail !== "function"){ alert("⚠️ Fonction d'envoi mail introuvable."); return; }
-          const ok = await sendCustomMail({ to: toClean, subject, body, attachmentBlob: currentContractBlob, attachmentName: currentContractFileName || "contrat.pdf" });
+          const ok = await sendCustomMail({ to: toClean, subject, body, signUrl: __inlineMailSignUrl, attachmentBlob: currentContractBlob, attachmentName: currentContractFileName || "contrat.pdf" });
           // En cas d'échec, sendCustomMail a déjà affiché la VRAIE erreur (ne pas l'écraser).
           if(ok) toast("✅ Email envoyé à " + toClean, "ok");
           // Si l'envoi a réussi ET qu'on avait un contrat généré en silent → crée la réservation
@@ -16079,12 +16079,12 @@ $("sendPreviewSendBtn").addEventListener("click", () => {
 });
 
 // === Helper générique d'envoi d'un mail (Gmail OAuth) avec pièce jointe optionnelle ===
-async function sendCustomMail({ to, subject, body, attachmentBlob, attachmentName }){
+async function sendCustomMail({ to, subject, body, signUrl, attachmentBlob, attachmentName }){
   // ===== MODE BACKEND : envoi via le Worker (refresh token permanent) =====
   if(gmailBackend()){
     if(typeof wipStart === "function") wipStart("📧 Envoi email à " + to + "…");
     try {
-      const bodyHtml = buildEmailBodyHtml(body);
+      const bodyHtml = buildEmailBodyHtml(body, signUrl);
       const opts = { to, subject, bodyHtml };
       if(attachmentBlob && attachmentName){
         opts.attachmentBase64 = await blobToBase64Plain(attachmentBlob);
