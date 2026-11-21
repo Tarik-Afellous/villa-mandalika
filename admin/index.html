@@ -6027,36 +6027,31 @@ function buildContratPdfDef(d){
   c.push(`Le Locataire devra obligatoirement procéder, avant son entrée dans les lieux, à une empreinte bancaire d'un montant de ${cautionFmt} € via la plateforme sécurisée SWIKLY, partenaire du Bailleur, en cliquant sur le lien suivant :`);
   const swiklyHref = d.swikly_link || 'https://v2.swik.link/iX2hc6L';
   c.push({
-    table: { widths: ['*'], body: [[{
-      text: [
-        { text: '➤  ', fontSize: 14, color: '#fff' },
-        { text: 'CLIQUEZ ICI POUR DÉPOSER LA CAUTION', bold: true, fontSize: 13, color: '#fff', characterSpacing: 1.5 }
-      ],
-      link: swiklyHref,
-      alignment: 'center',
-      fillColor: NAVY,
-      margin: [0, 16, 0, 16],
-      border: [false, false, false, false]
-    }]] },
-    layout: { defaultBorder: false },
-    margin: [0, 12, 0, 8]
-  });
-  c.push({
-    table: { widths: ['*'], body: [[{
-      text: [
-        { text: '📋  Copier le lien :  ', color: NAVY, fontSize: 8.5, bold: true },
-        { text: swiklyHref, link: swiklyHref, color: GOLD, fontSize: 8.5, decoration: 'underline' }
-      ],
-      alignment: 'center',
-      margin: [8, 8, 8, 8]
-    }]] },
-    layout: {
-      defaultBorder: true,
-      hLineColor: () => GOLD, vLineColor: () => GOLD,
-      hLineWidth: () => 0.4, vLineWidth: () => 0.4,
-      fillColor: () => '#fbf6ec'
-    },
-    margin: [0, 0, 0, 12]
+    unbreakable: true,
+    stack: [
+      {
+        table: { widths: ['*'], body: [[{
+          text: 'CLIQUEZ ICI POUR DEPOSER LA CAUTION',
+          bold: true, fontSize: 12, color: '#fff', characterSpacing: 1.5,
+          link: swiklyHref,
+          alignment: 'center',
+          fillColor: NAVY,
+          margin: [0, 14, 0, 14],
+          border: [false, false, false, false]
+        }]] },
+        layout: { defaultBorder: false },
+        margin: [40, 0, 40, 0]
+      },
+      {
+        text: [
+          { text: 'Lien : ', color: NAVY, fontSize: 7.5, bold: true },
+          { text: swiklyHref, link: swiklyHref, color: GOLD, fontSize: 7.5, decoration: 'underline' }
+        ],
+        alignment: 'center',
+        margin: [40, 6, 40, 0]
+      }
+    ],
+    margin: [0, 12, 0, 12]
   });
   c.push("Cette empreinte constitue une pré-autorisation bancaire sans débit, destinée à garantir la couverture de tout dommage, dégradation, non-respect du contrat, frais supplémentaires ou pénalité imputable au Locataire ou à ses invités. La validation de cette empreinte est une condition obligatoire d'accès à la propriété. À défaut, le Bailleur pourra refuser l'entrée dans les lieux, sans remboursement des sommes versées.");
   c.push({ text: "L'empreinte sera conservée pendant la durée de la location et libérée automatiquement sous 7 jours ouvrés après la sortie, sous réserve de l'absence de dommage ou de frais. En cas de manquement constaté, le Bailleur se réserve le droit de retenir tout ou partie de l'empreinte bancaire, sur présentation de justificatifs.", margin: [0, 4, 0, 4] });
