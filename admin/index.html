@@ -16033,9 +16033,19 @@ function buildEmailBodyHtml(bodyText, signUrl){
       '</a>' +
     '</div>';
   }
+  let cautionBlock = '';
+  const swiklyMatch = bodyText.match(/https:\/\/v2\.swik\.link\/\S+/);
+  if(swiklyMatch){
+    cautionBlock = '<div style="text-align:center;margin:16px 0 20px">' +
+      '<a href="' + swiklyMatch[0].replace(/"/g, '&quot;') + '" style="display:inline-block;padding:14px 32px;background:#b8924c;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;letter-spacing:0.5px">' +
+      '&#128737;&#65039; Déposer la caution' +
+      '</a>' +
+    '</div>';
+  }
   return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:13.5px;color:#1a2332;line-height:1.55;max-width:600px">' +
     '<div>' + textToHtmlSafe(bodyText) + '</div>' +
     signBlock +
+    cautionBlock +
     buildEmailSignatureHtml() +
   '</div>';
 }
