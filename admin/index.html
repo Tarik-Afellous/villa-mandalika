@@ -1156,6 +1156,42 @@
                 <label>Téléphone</label>
                 <input type="tel" id="bk_telephone">
               </div>
+              <div>
+                <label>Nombre de personnes</label>
+                <input type="number" id="bk_nbPersonnes" min="1" max="500" placeholder="Ex : 30">
+              </div>
+              <div>
+                <label>Nature de l'événement</label>
+                <select id="bk_eventNature">
+                  <option value="">— non précisé —</option>
+                  <option value="anniversaire">Anniversaire</option>
+                  <option value="mariage">Mariage</option>
+                  <option value="bapteme">Baptême</option>
+                  <option value="fiancailles">Fiançailles</option>
+                  <option value="seminaire">Séminaire / corporate</option>
+                  <option value="fete_privee">Fête privée</option>
+                  <option value="tournage">Tournage / shooting</option>
+                  <option value="hebergement">Hébergement seul</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </div>
+              <div>
+                <label>Montant total (€)</label>
+                <input type="number" id="bk_montantTotal" min="0" step="0.01" placeholder="Ex : 2500">
+              </div>
+              <div>
+                <label>Source</label>
+                <select id="bk_source">
+                  <option value="manual">Directe</option>
+                  <option value="airbnb">Airbnb</option>
+                  <option value="booking">Booking</option>
+                  <option value="agoda">Agoda</option>
+                  <option value="abritel">Abritel</option>
+                  <option value="bouche_a_oreille">Bouche à oreille</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="site_web">Site web</option>
+                </select>
+              </div>
               <div style="grid-column:1/-1">
                 <label>Assigner à (qui s'occupe de cette résa)</label>
                 <select id="bk_assignedTo" style="width:100%;background:#0f172a;border:1px solid var(--line);color:var(--txt);padding:10px 12px;border-radius:8px;font-size:14px">
