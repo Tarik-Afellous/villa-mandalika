@@ -14264,7 +14264,7 @@ function relancePaymentByMail(bookingId){
         to: email,
         subject: subject,
         body: body,
-        attachInfo: "✨ Signature ST EVENTS ajoutée automatiquement"
+        attachInfo: "✨ Signature Villa Mandalika ajoutée automatiquement"
       });
     }
   }, 200);
@@ -15312,7 +15312,7 @@ function openContractPreview(blob, fileName, data, mode){
         subject: subject,
         body: body,
         signUrl: signUrl,
-        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat.pdf") + "  +  ✍️ Bouton de signature en ligne inclus  ·  ✨ Signature ST EVENTS ajoutée automatiquement"
+        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat.pdf") + "  +  ✍️ Bouton de signature en ligne inclus  ·  ✨ Signature Villa Mandalika ajoutée automatiquement"
       });
     });
   }
@@ -15401,7 +15401,7 @@ function openContractPreview(blob, fileName, data, mode){
         to: rawEmail,
         subject: subject,
         body: body,
-        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat-contresigne.pdf") + "  ·  ✨ Signature ST EVENTS ajoutée automatiquement"
+        attachInfo: "📎 Pièce jointe : " + (currentContractFileName || "contrat-contresigne.pdf") + "  ·  ✨ Signature Villa Mandalika ajoutée automatiquement"
       });
     });
   }
@@ -16059,7 +16059,7 @@ function openSendPreview(opts){
     ? ("📎 Pièce jointe : " + attachName + (mode === "whatsapp" ? " (à attacher manuellement dans WhatsApp après ouverture)" : ""))
     : "";
   if(mode === "gmail"){
-    info += (info ? "  ·  " : "") + "✨ Signature ST EVENTS ajoutée automatiquement";
+    info += (info ? "  ·  " : "") + "✨ Signature Villa Mandalika ajoutée automatiquement";
   }
   $("sendPreviewAttachInfo").textContent = info;
   $("sendPreviewSendBtn").textContent = mode === "gmail" ? "📨 Envoyer par Gmail" : "💬 Ouvrir WhatsApp";
@@ -16254,7 +16254,7 @@ async function sendContractViaGmailAPI(){
        "Je vous prie de trouver ci-joint le contrat de location de la Villa Mandalika pour votre réservation du " + (d.date_debut || "") +
        (d.date_fin && d.date_fin !== d.date_debut ? " au " + d.date_fin : "") + ".\n\n" +
        "Merci de bien vouloir le relire, le signer et nous le retourner. Veuillez également nous faire parvenir l'acompte de règlement qui nous permettra de bloquer définitivement vos dates de séjour.\n\n" +
-       "Pour toute question, vous pouvez nous joindre par WhatsApp ou par email.\n\n" +
+       "Pour toute question, n'hésitez pas à nous contacter par téléphone, WhatsApp ou par email.\n\n" +
        "Cordialement,");
 
   // Envoi RÉEL après confirmation modale (avec valeurs potentiellement modifiées par le user)
