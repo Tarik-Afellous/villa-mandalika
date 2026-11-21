@@ -4670,6 +4670,18 @@ $("addSocBtn").addEventListener("click", () => {
 // Init : fixe le libellé TTC/HT au chargement.
 if(typeof refreshMoneyLabels === "function") refreshMoneyLabels();
 
+$("addRepBtn").addEventListener("click", () => {
+  const wrap = $("repWrap");
+  if(wrap.classList.contains("hide")){
+    wrap.classList.remove("hide");
+    $("addRepBtn").textContent = "− Retirer le représentant";
+  } else {
+    wrap.classList.add("hide");
+    $("addRepBtn").textContent = "+ Représenté par (conciergerie)";
+    wrap.querySelectorAll("input").forEach(i => i.value = "");
+  }
+});
+
 // Upload Kbis
 function clearKbisFile(){
   kbisFileData = null;
