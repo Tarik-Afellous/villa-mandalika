@@ -4203,7 +4203,13 @@ $("genBtn").addEventListener("click", () => {
         const cfg = currentBailleurConfig();
         const id = $("ribSelect").value;
         return cfg.ribs.find(r => r.id === id) || cfg.ribs[0] || DEFAULT_RIB;
-      })()
+      })(),
+      representePar: !$("repWrap").classList.contains("hide") ? {
+        nom: $("repNom").value.trim(),
+        adresse: $("repAdresse").value.trim(),
+        email: $("repEmail").value.trim(),
+        telephone: $("repTelephone").value.trim()
+      } : null
     };
     try{ data._formSnapshot = (typeof captureContractForm === "function") ? captureContractForm() : null; }catch(_){}
     const docDef = buildContratPdfDef(data);
