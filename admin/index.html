@@ -7249,6 +7249,12 @@ function renderCalendar(){
         if(srcTag) txt += srcTag + " ";
         if(timeLabel) txt += timeLabel + " ";
         if(_evStat === "devis_envoye") txt += "📩 ";
+        else if(_evStat === "nouveau") txt += "⏳ ";
+        // Indicateur de paiement : 💰 si tous payés, sinon rien (le statut suffit)
+        if(_evStat === "valide" && ev.paiements && ev.paiements.length > 0){
+          const _allP = ev.paiements.every(p => p.status === "paid");
+          if(_allP) txt += "💰 ";
+        }
         txt += titleBase;
         txt = txt.slice(0, 45);
         const tooltip = (_evStat === "devis_envoye" ? "📩 Devis envoyé — à relancer · " : "") + (ev.source ? (ev.source.toUpperCase() + " · ") : "") + (ev.heureDebut ? (ev.heureDebut + (ev.heureFin ? "-" + ev.heureFin : "") + " · ") : "") + (ev.title || "");
