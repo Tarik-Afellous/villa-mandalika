@@ -16322,6 +16322,7 @@ async function sendContractViaGmailAPI(){
         "📎 PDF " + (currentContractFileName || "contrat.pdf") + " attaché automatiquement.<br>" +
         '🔎 <a href="https://mail.google.com/mail/u/0/#sent/' + (j.id || "") + '" target="_blank" style="color:var(--accent2)">Voir l\'email dans Messages envoyés ↗</a>';
       toast("✅ Contrat envoyé par Gmail.", "ok");
+      if(typeof switchTab === "function") switchTab("t-calendar");
     } catch(err){
       console.error("Gmail send failed:", err);
       $("cp_emailHint").innerHTML = '⚠️ <strong>Erreur Gmail :</strong> ' + err.message;
