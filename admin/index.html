@@ -7273,7 +7273,13 @@ function renderCalendar(){
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       hideEventTooltip();
-      openBookingModal(el.dataset.id);
+      const _bk = bookings.find(x => x.id === el.dataset.id);
+      if(_bk && (_bk.formSnapshot || (_bk.contracts && _bk.contracts.length > 0))){
+        const _ct = (_bk.contracts || []).filter(c => c && !c.isDraft).pop() || null;
+        editContractFromHistory(_bk, _ct);
+      } else {
+        openBookingModal(el.dataset.id);
+      }
     });
     el.addEventListener("mouseenter", (e) => {
       const b = bookings.find(x => x.id === el.dataset.id);
