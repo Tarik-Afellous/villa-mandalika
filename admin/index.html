@@ -7866,14 +7866,14 @@ $("bk_useForContractBtn").addEventListener("click", () => {
   }
   const b = bookings.find(x => x.id === editingId);
   if(!b) return;
-  // Pré-remplir le formulaire principal
-  if(b.title) $("nom").value = b.title;
-  if(b.email) $("email").value = b.email;
-  if(b.telephone) $("telephone").value = b.telephone;
-  if(b.dateDebut) $("dateDebut").value = b.dateDebut;
-  if(b.dateFin) $("dateFin").value = b.dateFin;
-  if(b.heureDebut) $("heureDebut").value = b.heureDebut;
-  if(b.heureFin) $("heureFin").value = b.heureFin;
+  // Pré-remplir le formulaire principal (toujours écraser pour ne pas garder les données d'une autre résa)
+  $("nom").value = b.title || "";
+  $("email").value = b.email || "";
+  $("telephone").value = b.telephone || "";
+  $("dateDebut").value = b.dateDebut || "";
+  $("dateFin").value = b.dateFin || "";
+  $("heureDebut").value = b.heureDebut || "";
+  $("heureFin").value = b.heureFin || "";
   // Recalcule la visibilité du champ "personnes restant dormir" (visite same-day)
   if(typeof togglePersonnesNuit === "function") togglePersonnesNuit();
   // Mémorise le lien : le prochain PDF généré sera attaché à cette réservation
