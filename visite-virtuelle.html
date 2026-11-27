@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visite virtuelle · Villa Mandalika</title>
+<meta name="description" content="Visitez la Villa Mandalika pièce par pièce : parc, barbecue, piscine intérieure, salle de jeux, chambres et jardin-terrasse sur le toit.">
+<link rel="canonical" href="https://villa-mandalika.com/visite-virtuelle.html">
+<meta property="og:title" content="Visite virtuelle — Villa Mandalika">
+<meta property="og:image" content="https://villa-mandalika.com/photos/facade-panorama.jpg">
+<style>
+@font-face{font-family:'Playfair';src:url('fonts/playfair.woff2') format('woff2');font-weight:400 800;font-display:swap;}
+@font-face{font-family:'Nunito';src:url('fonts/nunito.woff2') format('woff2');font-weight:300 800;font-display:swap;}
+@font-face{font-family:'Pinyon';src:url('fonts/pinyon.woff2') format('woff2');font-weight:400;font-display:swap;}
+:root{
+  --ink:#F4F1EC;--soft:rgba(244,241,236,.72);--dim:rgba(244,241,236,.5);
+  --sand:#E6C9AF;--sand-deep:#D8B692;--bg:#141311;--glass:rgba(20,19,17,.55);
+  --line:rgba(244,241,236,.18);
+  --serif:'Playfair',Georgia,serif;--sans:'Nunito',system-ui,-apple-system,sans-serif;--script:'Pinyon',cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+
+/* ---------- Scène ---------- */
+#stage{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none}
+#stage.drag{cursor:grabbing}
+.layer{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease}
+.layer.on{opacity:1}
+.layer img,.layer video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;
+  width:auto;height:auto;transform-origin:center;will-change:transform}
+.layer img{max-width:none}
+.vignette{position:fixed;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.45) 0,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 45%,rgba(0,0,0,.85) 100%),
+             linear-gradient(90deg,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 55%)}
+
+/* ---------- Barre haute ---------- */
+header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;
+  padding:max(14px,env(safe-area-inset-top)) 20px 14px;z-index:10}
+header img{height:34px}
+header .grow{flex:1}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;
+  background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);font-size:14px;font-weight:600;transition:background .2s}
+.pill:hover{background:rgba(20,19,17,.8)}
+.pill.gold{background:var(--sand);color:#2a241e;border-color:transparent}
+.pill.gold:hover{background:var(--sand-deep)}
+.pill svg{width:17px;height:17px}
+
+/* ---------- Légende ---------- */
+#caption{position:fixed;left:clamp(20px,4vw,56px);bottom:calc(150px + env(safe-area-inset-bottom));max-width:560px;z-index:5}
+#caption .zone{font-family:var(--script);font-size:30px;color:var(--sand);line-height:1}
+#caption h1{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5vw,58px);line-height:1.05;margin:4px 0 10px;text-shadow:0 2px 30px rgba(0,0,0,.4)}
+#caption p{color:var(--soft);font-size:16px;line-height:1.55;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+#caption .dots{margin-top:14px}
+#caption .photo-btn{background:rgba(230,201,175,.92);color:#2a241e;border-color:transparent;font-size:13px;padding:7px 14px}
+#caption .next{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+#caption .next .pill{font-size:13px;padding:7px 13px}
+.fade-in{animation:fi .8s ease both}
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ---------- Flèches ---------- */
+.arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:6;width:52px;height:52px;border-radius:50%;
+  display:grid;place-items:center;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--line)}
+.arrow:hover{background:rgba(20,19,17,.85)}
+.arrow svg{width:22px;height:22px}
+#prev{left:16px}#next{right:16px}
+
+/* ---------- Pellicule ---------- */
+#strip{position:fixed;left:0;right:0;bottom:0;z-index:7;padding:12px 20px calc(14px + env(safe-area-inset-bottom));
+  display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
+#strip::-webkit-scrollbar{display:none}
+.thumb{flex:0 0 auto;width:118px;border-radius:10px;overflow:hidden;position:relative;opacity:.62;
+  border:2px solid transparent;transition:opacity .2s,border-color .2s,transform .2s}
+.thumb:hover{opacity:.9;transform:translateY(-2px)}
+.thumb.on{opacity:1;border-color:var(--sand)}
+.thumb img{display:block;width:100%;height:72px;object-fit:cover}
+.thumb span{position:absolute;left:0;right:0;bottom:0;padding:14px 7px 5px;font-size:11px;font-weight:700;
+  background:linear-gradient(transparent,rgba(0,0,0,.8));text-align:left}
+.thumb .badge{position:absolute;top:5px;left:5px;bottom:auto;right:auto;padding:2px 6px;border-radius:5px;
+  background:var(--sand);color:#2a241e;font-size:9.5px;letter-spacing:.04em}
+
+/* ---------- Plan ---------- */
+#plan{position:fixed;top:0;right:0;bottom:0;width:min(360px,92vw);z-index:20;background:rgba(20,19,17,.92);
+  backdrop-filter:blur(18px);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .35s ease;
+  padding:76px 26px 30px;overflow-y:auto}
+#plan.open{transform:none}
+#plan h2{font-family:var(--serif);font-weight:500;font-size:26px;margin-bottom:4px}
+#plan .sub{color:var(--dim);font-size:13px;margin-bottom:18px}
+#plan h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sand);margin:22px 0 8px}
+#plan button.room{display:flex;width:100%;align-items:center;gap:12px;padding:8px;border-radius:10px;text-align:left;font-size:15px}
+#plan button.room:hover,#plan button.room.on{background:rgba(244,241,236,.08)}
+#plan button.room img{width:52px;height:38px;object-fit:cover;border-radius:6px}
+#plan .x{position:absolute;top:20px;right:20px}
+
+/* ---------- Intro ---------- */
+#intro{position:fixed;inset:0;z-index:30;display:grid;place-items:center;text-align:center;padding:30px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.45),rgba(0,0,0,.7));transition:opacity .9s}
+#intro.gone{opacity:0;pointer-events:none}
+body.intro #caption,body.intro #strip,body.intro .arrow,body.intro #advisor{opacity:0;pointer-events:none}
+#caption,#strip,.arrow{transition:opacity .6s}
+#intro .script{font-family:var(--script);font-size:clamp(34px,5vw,52px);color:var(--sand)}
+#intro h1{font-family:var(--serif);font-weight:500;font-size:clamp(40px,7vw,86px);line-height:1;margin:6px 0 16px;text-shadow:0 4px 40px rgba(0,0,0,.5)}
+#intro p{color:var(--soft);max-width:520px;margin:0 auto 28px;font-size:17px;line-height:1.6}
+#intro .pill{font-size:16px;padding:14px 26px}
+#intro .hint{margin-top:18px;font-size:12.5px;color:var(--dim)}
+
+/* ---------- Vidéo ---------- */
+#vbox{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;gap:28px;padding:24px}
+#vbox.open{display:flex}
+#vbox video{max-height:86vh;max-width:min(480px,90vw);border-radius:14px;background:#000}
+#chapters{display:flex;flex-direction:column;gap:6px;min-width:200px}
+#chapters h3{font-family:var(--serif);font-weight:500;font-size:22px;margin-bottom:8px}
+#chapters button{text-align:left;padding:8px 12px;border-radius:8px;font-size:14px;color:var(--soft)}
+#chapters button:hover,#chapters button.on{background:rgba(244,241,236,.1);color:var(--ink)}
+#chapters b{color:var(--sand);font-variant-numeric:tabular-nums;margin-right:8px}
+#vbox .x{position:absolute;top:18px;right:18px}
+
+/* ---------- Conseiller ---------- */
+#advisor{position:fixed;right:20px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:8;display:flex;align-items:center;gap:10px}
+#advisor .face{width:58px;height:58px;border-radius:50%;background:var(--sand) center/cover;border:2px solid var(--ink);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);display:grid;place-items:center;color:#2a241e;font-family:var(--serif);font-size:22px}
+#advisor .bubble{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--line);padding:10px 14px;
+  border-radius:14px 14px 4px 14px;font-size:13.5px;max-width:220px;line-height:1.4}
+
+#progress{position:fixed;top:0;left:0;height:2px;background:var(--sand);z-index:11;transition:width .5s}
+.hidden{display:none!important}
+
+@media (max-width:720px){
+  .arrow{display:none}
+  #caption{bottom:calc(128px + env(safe-area-inset-bottom));right:20px}
+  #caption p{font-size:14.5px}
+  .thumb{width:92px}.thumb img{height:58px}
+  header .label{display:none}
+  #intro .hint{display:none}
+  #advisor .bubble{display:none}
+  #advisor{bottom:auto;top:70px;right:14px}
+  #advisor .face{width:46px;height:46px;font-size:18px}
+  #vbox{flex-direction:column;overflow:auto}
+  #vbox video{max-height:60vh}
+  #chapters{flex-direction:row;flex-wrap:wrap;min-width:0}
+  #chapters h3{width:100%}
+}
+@media (prefers-reduced-motion:reduce){.layer{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+<div class="vignette"></div>
+<div id="progress"></div>
+
+<header>
+  <a href="index.html" aria-label="Retour au site"><img src="logo/logo-blanc.png" alt="Villa Mandalika"></a>
+  <div class="grow"></div>
+  <button class="pill" id="btnVideo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span class="label">Visite filmée</span></button>
+  <button class="pill" id="btnPlan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span class="label">Plan</span></button>
+  <a class="pill gold" href="index.html#contact">Réserver</a>
+</header>
+
+<div id="caption"></div>
+
+<button class="arrow" id="prev" aria-label="Pièce précédente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+<button class="arrow" id="next" aria-label="Pièce suivante"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg></button>
+
+<nav id="strip" aria-label="Pièces"></nav>
+
+<!-- Conseiller virtuel : remplacer ADVISOR.url par le lien de l'avatar quand il sera prêt -->
+<a id="advisor" class="hidden" target="_blank" rel="noopener">
+  <span class="bubble">Une question ? Organisons votre visite sur place.</span>
+  <span class="face">M</span>
+</a>
+
+<aside id="plan" aria-label="Plan de la villa">
+  <button class="pill x" id="planClose">Fermer</button>
+  <h2>Plan de la visite</h2>
+  <div class="sub">Choisissez un espace pour vous y rendre directement.</div>
+  <div id="planList"></div>
+</aside>
+
+<div id="vbox" role="dialog" aria-label="Visite filmée">
+  <button class="pill x" id="vClose">Fermer</button>
+  <video id="vid" controls playsinline preload="metadata" poster="video/poster-visite.jpg">
+    <source src="video/visite-villa-sans-spa.mp4" type="video/mp4">
+  </video>
+  <div id="chapters"><h3>Chapitres</h3></div>
+</div>
+
+<div id="intro">
+  <div>
+    <div class="script">Bienvenue à la</div>
+    <h1>Villa Mandalika</h1>
+    <p>Survolez le domaine puis entrez dans chaque pièce. Glissez l'image pour regarder autour de vous.</p>
+    <button class="pill gold" id="start">Commencer la visite</button>
+    <div class="hint">← → pour naviguer · P pour le plan · V pour la vidéo</div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURATION
+   - Vidéo drone : déposer le fichier dans video/drone.mp4
+     (il sera utilisé automatiquement pour la vue aérienne).
+   - Conseiller / avatar : renseigner ADVISOR.url.
+   ============================================================ */
+const DRONE_VIDEO = 'video/drone.mp4';
+const ADVISOR = { url: '', name: 'Votre conseiller', photo: '' };
+
+const SCENES = [
+  {id:'aerien', zone:'Vue drone', title:'Le domaine', imgs:['photos/facade-panorama.jpg'], drone:true,
+   text:'Une villa de caractère au cœur d’un parc clos de 3 000 m², à 20 minutes de Paris.', near:['facade','parc','rooftop']},
+  {id:'facade', zone:'Extérieur', title:'La façade', imgs:['photos/facade-parc.jpg','photos/exterieur.jpg'],
+   text:'Colonnes, balustres et terrasses : la demeure se découvre depuis le parc.', near:['entree','parc','bbq']},
+  {id:'parc', zone:'Extérieur', title:'Le parc', imgs:['photos/parc.jpg'],
+   text:'Pelouses, arbres centenaires et espaces pour vos réceptions en plein air.', near:['bbq','facade','rooftop']},
+  {id:'rooftop', zone:'Rooftop', title:'Le jardin-terrasse', imgs:['photos/rooftop-panorama.jpg','photos/terrasse-jardin.jpg','photos/rooftop-salon.jpg','photos/rooftop-lounge.jpg','photos/rooftop-bbq.jpg'],
+   text:'Le rooftop de la villa : un jardin-terrasse sur le toit, pelouse, salons d’extérieur et vue dégagée sur le parc.', near:['parc','bbq','facade']},
+  {id:'bbq', zone:'Extérieur', title:'Le barbecue sous le dôme', imgs:['photos/bbq-kiosque.jpg','photos/bbq-grill.jpg'],
+   text:'Dans le jardin, un kiosque à dôme abrite le barbecue en pierre et ses banquettes.', near:['parc','facade']},
+  {id:'entree', zone:'Rez-de-chaussée', title:'L’entrée', imgs:['photos/entree-colonnes.jpg'],
+   text:'Un hall à colonnes et un grand volume qui donne le ton dès l’arrivée.', near:['sejour','escalier']},
+  {id:'sejour', zone:'Rez-de-chaussée', title:'Le séjour', imgs:['photos/sejour-profondeur.jpg','photos/sejour-100m2.jpg','photos/sejour.jpg'],
+   text:'Près de 100 m² de pièce de vie lumineuse, salon et coin repas.', near:['salle-manger','salon','veranda']},
+  {id:'salle-manger', zone:'Rez-de-chaussée', title:'La salle à manger', imgs:['photos/salle-manger.jpg','photos/sejour-profondeur.jpg'],
+   text:'Une grande table pour réunir famille et invités.', near:['sejour','veranda']},
+  {id:'salon', zone:'Rez-de-chaussée', title:'Le salon', imgs:['photos/salon.jpg','photos/salon2.jpg','photos/salon-piscine.jpg'],
+   text:'Canapés généreux pour se retrouver au calme.', near:['sejour']},
+  {id:'veranda', zone:'Rez-de-chaussée', title:'La véranda', imgs:['photos/veranda-piscine.jpg','photos/veranda.jpg'],
+   text:'Baignée de lumière, elle relie le séjour à la piscine.', near:['piscine','sejour']},
+  {id:'piscine', zone:'Piscine intérieure', title:'La piscine chauffée', imgs:['photos/piscine-int.jpg','photos/piscine.jpg','photos/piscine2.jpg'],
+   text:'Piscine intérieure chauffée toute l’année, baies vitrées ouvertes sur le jardin.', near:['veranda','salon','salle-jeux']},
+  {id:'salle-jeux', zone:'Espace loisirs', title:'La salle de jeux', imgs:['photos/salle-jeux.jpg','photos/salle-jeux-nuit.jpg'],
+   text:'Borne d’arcade, baby-foot et grand espace pour les soirées.', near:['billard','cinema']},
+  {id:'billard', zone:'Espace loisirs', title:'Le billard', imgs:['photos/billard.jpg'],
+   text:'Table de billard pour les parties entre amis.', near:['salle-jeux']},
+  {id:'cinema', zone:'Espace loisirs', title:'L’espace cinéma', imgs:['photos/cinema.jpg'],
+   text:'Grand écran et canapés pour les soirées film.', near:['salle-jeux']},
+  {id:'escalier', zone:'Étage', title:'L’escalier', imgs:['photos/escalier.jpg'],
+   text:'Il mène aux cinq chambres de l’étage.', near:['chambre-master','chambre-rose']},
+  {id:'chambre-master', zone:'Étage', title:'La suite parentale', imgs:['photos/chambre-master.jpg'],
+   text:'La plus grande chambre, lit double et rangements.', near:['bain','chambre-rose']},
+  {id:'chambre-rose', zone:'Étage', title:'La chambre rose', imgs:['photos/chambre-rose.jpg'],
+   text:'Chambre douce et lumineuse, lit double.', near:['chambre-mauve','bain']},
+  {id:'chambre-mauve', zone:'Étage', title:'La chambre mauve', imgs:['photos/chambre-mauve.jpg'],
+   text:'Lit double et décor apaisant.', near:['chambre-grise','bain']},
+  {id:'chambre-grise', zone:'Étage', title:'La chambre grise', imgs:['photos/chambre-grise.jpg'],
+   text:'Sobre et élégante, lit double.', near:['chambre-twin','bain']},
+  {id:'chambre-twin', zone:'Étage', title:'La chambre twin', imgs:['photos/chambre-twin.jpg'],
+   text:'Deux lits simples, idéale pour les enfants ou les amis.', near:['bain','rooftop']},
+  {id:'bain', zone:'Étage', title:'Les salles de bain', imgs:['photos/bain.jpg'],
+   text:'Salles de bain modernes avec douche à l’italienne.', near:['chambre-master','rooftop']},
+];
+
+/* Chapitres de la visite filmée (secondes) */
+const CHAPTERS = [
+  [0,'Vue drone'],[4,'Salle à manger'],[9,'Piscine intérieure'],[15,'Chambres'],
+  [21,'Salles de bain'],[33,'Salle de jeux'],[44,'Extérieurs'],
+];
+
+/* ============================================================ */
+const $ = s => document.querySelector(s);
+const stage = $('#stage'), cap = $('#caption'), strip = $('#strip');
+SCENES.forEach(s=>s.img=s.imgs[0]);
+const byId = Object.fromEntries(SCENES.map((s,i)=>[s.id,i]));
+let reqId = 0, photo = 0, cur = -1, layer = null, pan = {x:0,y:0}, zoom = 1, anim = null, hasDrone = false;
+
+// vidéo drone disponible ?
+fetch(DRONE_VIDEO,{method:'HEAD'}).then(r=>{
+  hasDrone = r.ok && (r.headers.get('content-type')||'').includes('video');
+  if(hasDrone && cur===0) show(0,true);
+}).catch(()=>{});
+
+if(ADVISOR.url){
+  const a=$('#advisor'); a.href=ADVISOR.url; a.classList.remove('hidden');
+  if(ADVISOR.photo){a.querySelector('.face').style.backgroundImage=`url(${ADVISOR.photo})`;a.querySelector('.face').textContent='';}
+}
+
+// pellicule + plan
+SCENES.forEach((s,i)=>{
+  const b=document.createElement('button');b.className='thumb';b.dataset.i=i;
+  b.innerHTML=`<img src="${s.img}" alt="" loading="lazy"><span>${s.title}</span>`+(s.drone?'<span class="badge">AÉRIEN</span>':'');
+  b.onclick=()=>show(i);strip.appendChild(b);
+});
+const zones=[...new Set(SCENES.map(s=>s.zone))];
+$('#planList').innerHTML=zones.map(z=>`<h3>${z}</h3>`+SCENES.map((s,i)=>s.zone!==z?'':
+  `<button class="room" data-i="${i}"><img src="${s.img}" alt="" loading="lazy">${s.title}</button>`).join('')).join('');
+$('#planList').onclick=e=>{const b=e.target.closest('.room');if(b){show(+b.dataset.i);togglePlan(false);}};
+
+function show(i,force,ph){
+  i=(i+SCENES.length)%SCENES.length;
+  if(i===cur && !force && ph===undefined) return;
+  const sameScene = i===cur && ph!==undefined;
+  cur=i; const s=SCENES[i]; photo=ph||0;
+  const L=document.createElement('div');L.className='layer';
+  const useVid = s.drone && hasDrone;
+  const m=document.createElement(useVid?'video':'img');
+  if(useVid){Object.assign(m,{src:DRONE_VIDEO,muted:true,loop:true,autoplay:true,playsInline:true});}
+  else{m.src=s.imgs[photo];m.alt=s.title;}
+  L.appendChild(m);stage.appendChild(L);
+  const token=++reqId;
+  const go=()=>{ if(token!==reqId){L.remove();return;}
+    requestAnimationFrame(()=>{L.classList.add('on');layer=L;
+    setTimeout(()=>{[...stage.children].forEach(c=>{if(c!==layer)c.remove();});},1200);
+    pan={x:0,y:0};zoom=1.12;fit();kenBurns();});};
+  if(useVid) m.addEventListener('loadeddata',go,{once:true}); else if(m.complete) go(); else m.onload=go;
+
+  if(sameScene){ renderDots(s); return; }
+  cap.innerHTML=`<div class="fade-in"><div class="zone">${s.zone}</div><h1>${s.title}</h1><p>${s.text}</p>
+    <div class="dots"></div>
+    <div class="next">${(s.near||[]).map(n=>`<button class="pill" data-go="${n}">→ ${SCENES[byId[n]].title}</button>`).join('')}</div></div>`;
+  renderDots(s);
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
+  document.querySelectorAll('#planList .room').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
+  strip.children[i].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  $('#progress').style.width=((i+1)/SCENES.length*100)+'%';
+  history.replaceState(null,'','#'+s.id);
+  // précharge la suivante
+  const n=new Image();n.src=SCENES[(i+1)%SCENES.length].img;
+}
+function renderDots(s){
+  const d=cap.querySelector('.dots'); if(!d) return;
+  d.innerHTML = s.imgs.length<2 ? '' :
+    `<button class="pill photo-btn" data-ph="${(photo+1)%s.imgs.length}">Photo ${photo+1} / ${s.imgs.length} — suivante →</button>`;
+}
+cap.onclick=e=>{const p=e.target.closest('[data-ph]');if(p){show(cur,false,+p.dataset.ph);return;}
+  const b=e.target.closest('[data-go]');if(b) show(byId[b.dataset.go]);};
+
+// dimensionne le média pour couvrir l'écran avec de la marge de déplacement
+function size(){
+  if(!layer) return null;
+  const m=layer.firstChild, W=innerWidth, H=innerHeight;
+  const iw=m.naturalWidth||m.videoWidth||W, ih=m.naturalHeight||m.videoHeight||H;
+  const k=Math.max(W/iw,H/ih)*zoom; return {m,w:iw*k,h:ih*k,W,H};
+}
+function fit(){
+  const z=size(); if(!z) return;
+  const mx=Math.max(0,(z.w-z.W)/2), my=Math.max(0,(z.h-z.H)/2);
+  pan.x=Math.max(-mx,Math.min(mx,pan.x)); pan.y=Math.max(-my,Math.min(my,pan.y));
+  z.m.style.width=z.w+'px';z.m.style.height=z.h+'px';
+  z.m.style.transform=`translate(calc(-50% + ${pan.x}px),calc(-50% + ${pan.y}px))`;
+}
+// lent travelling automatique (effet "caméra")
+function kenBurns(){
+  cancelAnimationFrame(anim);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const dir=cur%2?1:-1, t0=performance.now();
+  const step=t=>{ if(dragging) return;
+    const p=Math.min(1,(t-t0)/16000);
+    zoom=1.12+0.1*p; const z=size(); if(!z) return;
+    pan.x=dir*((z.w-z.W)/2)*(p*1.6-0.8); fit();
+    if(p<1) anim=requestAnimationFrame(step);};
+  anim=requestAnimationFrame(step);
+}
+
+// glisser pour regarder autour
+let dragging=false,sx=0,sy=0,px=0,py=0,moved=0;
+stage.addEventListener('pointerdown',e=>{dragging=true;cancelAnimationFrame(anim);stage.classList.add('drag');
+  sx=e.clientX;sy=e.clientY;px=pan.x;py=pan.y;moved=0;stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{if(!dragging)return;
+  pan.x=px+(e.clientX-sx);pan.y=py+(e.clientY-sy);moved=Math.abs(e.clientX-sx);fit();});
+const end=e=>{if(!dragging)return;dragging=false;stage.classList.remove('drag');
+  // swipe rapide sur mobile = pièce suivante/précédente
+  if(e.pointerType==='touch'&&moved>90){ const z=size(); if(z && z.w-z.W<60) show(cur+(e.clientX<sx?1:-1)); }};
+stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+stage.addEventListener('wheel',e=>{e.preventDefault();cancelAnimationFrame(anim);
+  zoom=Math.max(1,Math.min(2.2,zoom-e.deltaY*0.0015));fit();},{passive:false});
+addEventListener('resize',fit);
+
+$('#prev').onclick=()=>show(cur-1);$('#next').onclick=()=>show(cur+1);
+function togglePlan(v){$('#plan').classList.toggle('open',v);}
+$('#btnPlan').onclick=()=>togglePlan(!$('#plan').classList.contains('open'));
+$('#planClose').onclick=()=>togglePlan(false);
+
+// vidéo + chapitres
+const vid=$('#vid'), ch=$('#chapters');
+CHAPTERS.forEach(([t,l])=>{const b=document.createElement('button');b.dataset.t=t;
+  b.innerHTML=`<b>${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</b>${l}`;
+  b.onclick=()=>{vid.currentTime=t;vid.play();};ch.appendChild(b);});
+vid.ontimeupdate=()=>{let k=0;CHAPTERS.forEach(([t],i)=>{if(vid.currentTime>=t)k=i;});
+  ch.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i===k));};
+function toggleVideo(v){$('#vbox').classList.toggle('open',v); if(v) vid.play().catch(()=>{}); else vid.pause();}
+$('#btnVideo').onclick=()=>toggleVideo(true);$('#vClose').onclick=()=>toggleVideo(false);
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){toggleVideo(false);togglePlan(false);}
+  if($('#vbox').classList.contains('open')) return;
+  if(e.key==='ArrowRight') show(cur+1);
+  if(e.key==='ArrowLeft') show(cur-1);
+  if(e.key==='p'||e.key==='P') togglePlan(!$('#plan').classList.contains('open'));
+  if(e.key==='v'||e.key==='V') toggleVideo(true);
+  if(e.key==='Enter' && !$('#intro').classList.contains('gone')) start();
+});
+
+document.body.classList.add('intro');
+function start(){$('#intro').classList.add('gone');document.body.classList.remove('intro');}
+$('#start').onclick=start;
+
+// démarrage : scène depuis l'URL (#piscine) ou vue aérienne
+const startId=location.hash.slice(1);
+show(byId[startId]??0,true);
+if(startId && byId[startId]!==undefined) start();
+addEventListener('hashchange',()=>{const i=byId[location.hash.slice(1)];if(i!==undefined){show(i);start();}});
+</script>
+</body>
+</html>
