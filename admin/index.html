@@ -17321,7 +17321,7 @@ if(__origApplyPayload){
 
 
   /* ---------- Devis et contrats envoyés ---------- */
-  let df = "tous";
+  let df = "tous", devisQ = "";
   const docDate = c => (c && (c.generatedAt || c.sentAt || c.date)) || "";
   function devisRows(){
     const today = todayISO();
@@ -17346,7 +17346,8 @@ if(__origApplyPayload){
   }
   function renderDevis(){
     const body = document.getElementById("v2DevisBody"); if(!body) return;
-    const all = devisRows();
+    let all = devisRows();
+    if(devisQ){ const q = devisQ.toLowerCase(); all = all.filter(x => (x.b.title||x.b.nom||"").toLowerCase().indexOf(q)!==-1 || (x.last&&x.last.filename||"").toLowerCase().indexOf(q)!==-1 || (x.b.email||"").toLowerCase().indexOf(q)!==-1 || (x.b.eventNature||"").toLowerCase().indexOf(q)!==-1); }
     const g = {tous: all, br: all.filter(x => x.st[2] === "br"), env: all.filter(x => x.st[2] === "env"), acc: all.filter(x => x.st[2] === "acc"), ss: all.filter(x => x.st[2] === "ss")};
     document.querySelectorAll("#v2DevisTabs button").forEach(t => { t.setAttribute("aria-pressed", t.dataset.f === df); t.querySelector("span").textContent = g[t.dataset.f].length; });
     const list = g[df].slice().sort((x,y) => String(y.when).localeCompare(String(x.when)));
