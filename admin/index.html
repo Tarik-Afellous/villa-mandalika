@@ -6761,6 +6761,14 @@ const DEFAULT_RIB_REVOLUT = {
   iban: "",
   bic: "REVOGB21"
 };
+const DEFAULT_RIB_MYPOS = {
+  id: "mypos-default",
+  nom: "myPOS — Villa Mandalika",
+  banque: "myPOS",
+  titulaire: "FRAPPATELLO",
+  iban: "IE40 MPOS 9903 9093 5111 11",
+  bic: "MPOSIE2DXXX"
+};
 function loadBailleurConfig(){
   try{
     const raw = localStorage.getItem(BAILLEUR_KEY);
