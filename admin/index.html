@@ -17453,6 +17453,8 @@ if(__origApplyPayload){
   function renderV2(){ try{ renderResa(); renderPay(); renderDevis(); }catch(e){ console.warn("[v2] rendu impossible", e); } }
   window.renderV2 = renderV2;
 
+  (function(){ const si = document.getElementById("v2DevisSearch"); if(si){ let dt; si.addEventListener("input", () => { clearTimeout(dt); dt = setTimeout(() => { devisQ = si.value.trim(); renderDevis(); }, 200); }); } })();
+
   document.addEventListener("click", e => {
     const f = e.target.closest("#v2ResaTabs button"); if(f){ rf = f.dataset.f; renderResa(); return; }
     const g = e.target.closest("#v2PayTabs button"); if(g){ pf = g.dataset.f; renderPay(); return; }
