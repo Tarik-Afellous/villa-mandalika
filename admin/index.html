@@ -6783,9 +6783,10 @@ function currentBailleurConfig(){
     forme: "SASU",
     siret: "",
     adresse: "60 rue de Bellechasse, 75007 Paris",
-    ribs: [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }]
+    ribs: [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }, { ...DEFAULT_RIB_MYPOS }]
   };
-  if(!c.ribs) c.ribs = [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }];
+  if(!c.ribs) c.ribs = [{ ...DEFAULT_RIB }, { ...DEFAULT_RIB_REVOLUT }, { ...DEFAULT_RIB_MYPOS }];
+  if(!c.ribs.find(r => r.id === 'mypos-default')) c.ribs.push({ ...DEFAULT_RIB_MYPOS });
   return c;
 }
 function renderRibs(){
