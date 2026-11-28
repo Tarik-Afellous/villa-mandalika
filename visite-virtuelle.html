@@ -51,7 +51,7 @@ header .grow{flex:1}
 /* ---------- Légende ---------- */
 #caption{position:fixed;left:clamp(20px,4vw,56px);bottom:calc(150px + env(safe-area-inset-bottom));max-width:560px;z-index:5}
 #caption .zone{font-family:var(--script);font-size:30px;color:var(--sand);line-height:1}
-#caption h1{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5vw,58px);line-height:1.05;margin:4px 0 10px;text-shadow:0 2px 30px rgba(0,0,0,.4)}
+#caption h2{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5vw,58px);line-height:1.05;margin:4px 0 10px;text-shadow:0 2px 30px rgba(0,0,0,.4)}
 #caption p{color:var(--soft);font-size:16px;line-height:1.55;text-shadow:0 1px 12px rgba(0,0,0,.6)}
 #caption .dots{margin-top:14px}
 #caption .photo-btn{background:rgba(230,201,175,.92);color:#2a241e;border-color:transparent;font-size:13px;padding:7px 14px}
@@ -279,7 +279,7 @@ if(ADVISOR.url){
 // pellicule + plan
 SCENES.forEach((s,i)=>{
   const b=document.createElement('button');b.className='thumb';b.dataset.i=i;
-  b.innerHTML=`<img src="${s.img}" alt="" loading="lazy"><span>${s.title}</span>`+(s.drone?'<span class="badge">AÉRIEN</span>':'');
+  b.innerHTML=`<img src="${s.img}" alt="${s.title}" loading="lazy"><span>${s.title}</span>`+(s.drone?'<span class="badge">AÉRIEN</span>':'');
   b.onclick=()=>show(i);strip.appendChild(b);
 });
 const zones=[...new Set(SCENES.map(s=>s.zone))];
@@ -306,7 +306,7 @@ function show(i,force,ph){
   if(useVid) m.addEventListener('loadeddata',go,{once:true}); else if(m.complete) go(); else m.onload=go;
 
   if(sameScene){ renderDots(s); return; }
-  cap.innerHTML=`<div class="fade-in"><div class="zone">${s.zone}</div><h1>${s.title}</h1><p>${s.text}</p>
+  cap.innerHTML=`<div class="fade-in"><div class="zone">${s.zone}</div><h2>${s.title}</h2><p>${s.text}</p>
     <div class="dots"></div>
     <div class="next">${(s.near||[]).map(n=>`<button class="pill" data-go="${n}">→ ${SCENES[byId[n]].title}</button>`).join('')}</div></div>`;
   renderDots(s);
